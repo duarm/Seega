@@ -97,6 +97,9 @@ public class Board : MonoBehaviour
 	public delegate void OnStateChange();
 	public OnStateChange onStateChangeCallback;
 
+	public delegate void OnGameEnd(string winner, string winType);
+	public OnGameEnd onGameEndCallback;
+
 
 	//Unity Methods
 	void Reset()
@@ -277,37 +280,39 @@ public class Board : MonoBehaviour
 
 	public void EndGame(TokenType winner, VictoryType victoryType)
 	{
+		if(onGameEndCallback == null)
+			return;
+
 		CurrentState = GameState.END;
-		UIManager.Instance.ActiveSurrenderButton(false);
 
 		if(winner == TokenType.WHITE)
 		{
 			if(victoryType == VictoryType.TOTAL)
 			{
-				UIManager.Instance.ActivateEndWindow("Brancas","Total");
+				onGameEndCallback.Invoke("Brancas","Total");
 			}
 			else if(victoryType == VictoryType.GREAT)
 			{
-				UIManager.Instance.ActivateEndWindow("Brancas","Grande");
+				onGameEndCallback.Invoke("Brancas","Grande");
 			}
 			else if(victoryType == VictoryType.MINOR)
 			{
-				UIManager.Instance.ActivateEndWindow("Brancas","Pequena");
+				onGameEndCallback.Invoke("Brancas","Pequena");
 			}
 		}
 		else
 		{
 			if(victoryType == VictoryType.TOTAL)
 			{
-				UIManager.Instance.ActivateEndWindow("Pretas","Total");
+				onGameEndCallback.Invoke("Pretas","Total");
 			}
 			else if(victoryType == VictoryType.GREAT)
 			{
-				UIManager.Instance.ActivateEndWindow("Pretas","Grande");
+				onGameEndCallback.Invoke("Pretas","Grande");
 			}
 			else if(victoryType == VictoryType.MINOR)
 			{
-				UIManager.Instance.ActivateEndWindow("Pretas","Pequena");
+				onGameEndCallback.Invoke("Pretas","Pequena");
 			}
 		}
 	}
@@ -382,7 +387,6 @@ public class Board : MonoBehaviour
 	public void StartMovementPhase()
 	{
 		m_CurrentGameState = GameState.MOVEMENT;
-		UIManager.Instance.ActiveSurrenderButton(true);
 		VerifyAllTiles();
 
 		if(onStateChangeCallback != null)

@@ -30,9 +30,6 @@ public class ScreenFader : MonoBehaviour
     {
         GameObject screenFaderGameObject = new GameObject("SceneFader");
         s_Instance = screenFaderGameObject.AddComponent<ScreenFader>();
-        
-        //ScreenFader controllerPrefab = Resources.Load<ScreenFader> ("ScreenFader");
-        //s_Instance = Instantiate (controllerPrefab);
     }
     #endregion
 
@@ -66,13 +63,7 @@ public class ScreenFader : MonoBehaviour
         DontDestroyOnLoad (gameObject);
     }
 
-	public void RestartButton()
-	{
-		UIManager.Instance.ActiveSurrenderButton(false);
-		StartCoroutine(Restart());
-	}
-
-	IEnumerator Restart()
+	public IEnumerator Restart()
 	{
 		yield return ScreenFader.FadeSceneOut(1, 1);
 		yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);

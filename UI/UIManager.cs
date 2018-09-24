@@ -6,10 +6,6 @@ using TMPro;
 
 public class UIManager : MonoBehaviour 
 {
-	#region Singleton
-	static protected UIManager s_UIManager;
-	static public UIManager Instance { get { return s_UIManager; } }
-	#endregion
 	public TextMeshProUGUI turnText;
 	public TextMeshProUGUI stateText;
 
@@ -22,18 +18,13 @@ public class UIManager : MonoBehaviour
 
 	private string[] turns = new string[2] {"Branca","Preta"};
 	private string[] states = new string[2] {"Posicionamento", "Movimento"};
-	
-	private void Awake() 
-	{
-		s_UIManager = this;
-	}
-	
 
 	private void Start() 
 	{
 		Board.Instance.onTurnChangeCallback += UpdateTurnText;
-		Board.Instance.onStateChangeCallback += UpdateStateText;
-		restartButton.onClick.AddListener(ScreenFader.Instance.RestartButton);
+		Board.Instance.onStateChangeCallback += UpdateStateUI;
+		Board.Instance.onGameEndCallback += ActivateEndWindow;
+		restartButton.onClick.AddListener(RestartButton);
 	}
 
 	public void Starting(int starting)
@@ -57,6 +48,7 @@ public class UIManager : MonoBehaviour
 
 	public void ActivateEndWindow(string winner, string winType)
 	{
+		ActiveSurrenderButton(false);
 		endGameWindow.SetActive(true);
 		winnerText.text = winner;
 		victoryTypeText.text = winType;
@@ -76,6 +68,11 @@ public class UIManager : MonoBehaviour
 			Board.Instance.EndGame(TokenType.WHITE, VictoryType.GREAT);
 	}
 
+	public void RestartButton()
+	{
+		StartCoroutine(ScreenFader.Instance.Restart());
+	}
+
 	public void UpdateTurnText()
 	{
 		if(turnText == null)
@@ -91,7 +88,7 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
-	public void UpdateStateText()
+	public void UpdateStateUI()
 	{
 		if(stateText == null)
 			Debug.LogError("State Text display is null, verify the Editor reference.");
@@ -100,9 +97,13 @@ public class UIManager : MonoBehaviour
 		{
 			stateText.text = states[0];
 		}
-		else
+		else if(Board.Instance.CurrentState == GameState.MOVEMENT)
 		{
 			stateText.text = states[1];
+		}
+		else
+		{
+
 		}
 	}
 }

@@ -30,6 +30,7 @@ public class TileField : MonoBehaviour
 
 			if(Board.Instance.CurrentTurn == Turn.BLACK)
 			{
+				GetToken();
 				Token token = Board.Instance.GetNonPlacedBlackToken();
 				if(token != null)
 					token.MoveTo(new Vector3(this.transform.position.x,this.transform.position.y, -0.6f));
@@ -164,7 +165,13 @@ public class TileField : MonoBehaviour
 		}
 	}
 
-
+	private void GetToken()
+	{
+		Debug.Log("Draw Ray");
+		RaycastHit hit;
+		Ray ray = new Ray(transform.position,Vector3.back);
+		Debug.DrawRay(transform.position, Vector3.back,Color.red, 2);
+	}
 
 	public void HighlightEmptyNeighbors()
 	{

@@ -260,7 +260,6 @@ public class Token : MonoBehaviour
         if(MatchCaptureConditions(hittedToken))
         {
             hittedToken[0].Capture();
-            Debug.Log(hittedToken[0].name + " was captured by " + this.name);
             this.turnCaptures++;
             return 1;
         }
