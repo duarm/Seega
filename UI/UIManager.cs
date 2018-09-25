@@ -29,7 +29,6 @@ public class UIManager : MonoBehaviour
 
 	public void Starting(int starting)
 	{
-		Debug.Log("starting");
 		if(starting == 0)
 		{
 			Board.Instance.CurrentTurn = Turn.WHITE;

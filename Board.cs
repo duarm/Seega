@@ -395,8 +395,6 @@ public class Board : MonoBehaviour
 
 	//Game Methods
 
-	// <param name="other">The other Collider involved in this collision.</param>
-
 	/// <summary>
 	/// Returns the first non placed White token avaiable.null Returns null if none.
 	/// </summary>

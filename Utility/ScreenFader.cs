@@ -37,10 +37,7 @@ public class ScreenFader : MonoBehaviour
     {
         Black
     }
-
-    /// <summary>
-    /// Returns true if is fading
-    /// </summary>
+    
     public static bool IsFading
     {
         get { return Instance.m_IsFading; }
