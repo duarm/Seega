@@ -165,6 +165,7 @@ public class TileField : MonoBehaviour
 		}
 	}
 
+	//WORKING
 	private void GetToken()
 	{
 		Debug.Log("Draw Ray");
@@ -172,6 +173,7 @@ public class TileField : MonoBehaviour
 		Ray ray = new Ray(transform.position,Vector3.back);
 		Debug.DrawRay(transform.position, Vector3.back,Color.red, 2);
 	}
+	//END WORKING
 
 	public void HighlightEmptyNeighbors()
 	{
