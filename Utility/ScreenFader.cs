@@ -1,10 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
+//Unity 2d game kit Screen Fader
 public class ScreenFader : MonoBehaviour
-{       
+{
     #region Singleton
     public static ScreenFader Instance
     {
@@ -28,16 +29,28 @@ public class ScreenFader : MonoBehaviour
 
     public static void Create ()
     {
-        GameObject screenFaderGameObject = new GameObject("SceneFader");
-        s_Instance = screenFaderGameObject.AddComponent<ScreenFader>();
+        GameObject screenFaderGameObject = new GameObject ("SceneFader");
+        s_Instance = screenFaderGameObject.AddComponent<ScreenFader> ();
     }
+
+    void Awake ()
+    {
+        if (Instance != this)
+        {
+            Destroy (gameObject);
+            return;
+        }
+
+        DontDestroyOnLoad (gameObject);
+    }
+
     #endregion
 
     public enum FadeType
     {
         Black
     }
-    
+
     public static bool IsFading
     {
         get { return Instance.m_IsFading; }
@@ -49,32 +62,14 @@ public class ScreenFader : MonoBehaviour
 
     const int k_MaxSortingLayer = 32767;
 
-    void Awake ()
-    {
-        if (Instance != this)
-        {
-            Destroy (gameObject);
-            return;
-        }
-    
-        DontDestroyOnLoad (gameObject);
-    }
-
-	public IEnumerator Restart()
-	{
-		yield return ScreenFader.FadeSceneOut(1, 1);
-		yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
-		yield return ScreenFader.FadeSceneIn(0,.5f);
-	}
-
-    protected IEnumerator Fade(float finalAlpha, CanvasGroup canvasGroup, float fadeDuration)
+    protected IEnumerator Fade (float finalAlpha, CanvasGroup canvasGroup, float fadeDuration)
     {
         m_IsFading = true;
         canvasGroup.blocksRaycasts = true;
-        float fadeSpeed = Mathf.Abs(canvasGroup.alpha - finalAlpha) / fadeDuration;
-        while (!Mathf.Approximately(canvasGroup.alpha, finalAlpha))
+        float fadeSpeed = Mathf.Abs (canvasGroup.alpha - finalAlpha) / fadeDuration;
+        while (!Mathf.Approximately (canvasGroup.alpha, finalAlpha))
         {
-            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, finalAlpha,
+            canvasGroup.alpha = Mathf.MoveTowards (canvasGroup.alpha, finalAlpha,
                 fadeSpeed * Time.unscaledDeltaTime);
             yield return null;
         }
@@ -98,10 +93,11 @@ public class ScreenFader : MonoBehaviour
     {
         CanvasGroup canvasGroup;
         canvasGroup = Instance.faderCanvasGroup;
-        
-        yield return Instance.StartCoroutine(Instance.Fade(finalAlpha, canvasGroup, fadeDuration));
 
-        if(finalAlpha == 0)
+        Debug.Log ("Fading in");
+        yield return Instance.StartCoroutine (Instance.Fade (finalAlpha, canvasGroup, fadeDuration));
+
+        if (finalAlpha == 0)
             canvasGroup.gameObject.SetActive (false);
     }
 
@@ -116,9 +112,9 @@ public class ScreenFader : MonoBehaviour
     {
         CanvasGroup canvasGroup;
         canvasGroup = Instance.faderCanvasGroup;
-        
+
         canvasGroup.gameObject.SetActive (true);
-        
-        yield return Instance.StartCoroutine(Instance.Fade(finalAlpha, canvasGroup, fadeDuration));
+
+        yield return Instance.StartCoroutine (Instance.Fade (finalAlpha, canvasGroup, fadeDuration));
     }
 }

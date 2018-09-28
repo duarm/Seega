@@ -1,15 +1,21 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//AUTO TURN AN OBJECT
-public class AutoStart : MonoBehaviour 
+//AUTO ACTIVE OR DEACTIVE AN OBJECT ON START
+public class AutoStart : MonoBehaviour
 {
-	public GameObject startMenu;
-
-	void Start () 
-	{
-		if(!startMenu.activeInHierarchy)
-			startMenu.SetActive(true);
-	}
+    [Tooltip ("Value to set on Start")]
+    public GameObject[] gameObjects;
+    public bool active;
+    void Start ()
+    {
+        foreach (GameObject gameObject in gameObjects)
+        {
+            if (gameObject != null)
+            {
+                gameObject.SetActive (active);
+            }
+        }
+    }
 }
