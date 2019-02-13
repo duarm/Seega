@@ -58,7 +58,7 @@ public class ScreenFader : MonoBehaviour
 
     public CanvasGroup faderCanvasGroup;
 
-    protected bool m_IsFading;
+    private bool m_IsFading;
 
     const int k_MaxSortingLayer = 32767;
 
