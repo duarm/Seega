@@ -4,274 +4,326 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+public enum FieldColor
+{
+    BLACK,
+    WHITE
+}
+
 public class TileField : MonoBehaviour
 {
+    [Header("Tile Info")]
     public string column;
     public int line;
-    public Token token;
+    public FieldColor fieldColor = FieldColor.BLACK;
 
-    public TileField moveUpField;
-    public TileField moveDownField;
-    public TileField moveLeftField;
-    public TileField moveRightField;
-
+    [Header("Debugging")]
     public bool highlighting = false;
+    public Piece piece;
+
+    private MeshRenderer meshRenderer;
+
+    public bool CanMoveUp
+    {
+        get 
+        { 
+            if(m_UpTile != null) return UpTile.piece == null;
+            return false;
+        }
+    }
+
+    public bool CanMoveDown
+    {
+        get 
+        { 
+            if(m_DownTile != null) return m_DownTile.piece == null;
+            return false;
+        }
+    }
+
+    public bool CanMoveRight
+    {
+        get 
+        { 
+            if(RightTile != null) return RightTile.piece == null;
+            return false;
+        }
+    }
+
+    public bool CanMoveLeft
+    {
+        get 
+        { 
+            if(m_LeftTile != null) return m_LeftTile.piece == null;
+            return false;
+        }
+    }
+
+    public TileField UpTile
+    {
+        get { return m_UpTile; }
+    }
+
+    public TileField DownTile
+    {
+        get { return m_DownTile; }
+    }
+
+    public TileField RightTile
+    {
+        get { return m_RightTile; }
+    }
+
+    public TileField LeftTile
+    {
+        get { return m_LeftTile; }
+    }
+
+    TileField m_UpTile;
+    TileField m_DownTile;
+    TileField m_RightTile;
+    TileField m_LeftTile;
+    Board board;
+
+    private void Start() 
+    {
+        board = Board.Instance;
+        meshRenderer = GetComponent<MeshRenderer>();
+        Initialize();
+    }
 
     private void OnMouseDown ()
     {
-        if (Board.Instance.CurrentState == GameState.POSITIONING && !Board.Instance.IsUpdating)
+        if (Board.Instance.CurrentState == GameState.POSITIONING && !board.IsUpdating)
         {
-            if (token != null)
+            if (piece != null)
                 return;
 
             if (this.column == "c" && this.line == 3)
                 return;
 
-            if (Board.Instance.CurrentTurn == Turn.BLACK)
+            if (board.CurrentTurn == Turn.BLACK)
             {
-                Token token = Board.Instance.GetNonPlacedBlackToken ();
-                if (token != null)
-                    token.MoveTo (new Vector3 (this.transform.position.x, this.transform.position.y, -0.6f));
+                Piece piece = board.GetNonPlacedBlackPiece();
+                if (piece != null)
+                {
+                    //teleporting the piece to the right place
+                    Vector3 move = new Vector3 (this.transform.localPosition.x, .5f, this.transform.localPosition.y);
+                    piece.Teleport (move);
+                }
 
-                this.token = token;
+                this.piece = piece;
             }
-            else if (Board.Instance.CurrentTurn == Turn.WHITE)
+            else
             {
-                Token token = Board.Instance.GetNonPlacedWhiteToken ();
-                if (token != null)
-                    token.MoveTo (new Vector3 (this.transform.position.x, this.transform.position.y, -0.6f));
+                Piece piece = Board.Instance.GetNonPlacedWhitePiece();
+                if (piece != null)
+                {
+                    Vector3 move = new Vector3 (this.transform.localPosition.x, .5f, this.transform.localPosition.y);
+                    piece.Teleport (move);
+                }
 
-                this.token = token;
+                this.piece = piece;
             }
 
             Board.Instance.UpdatePlacedCounters ();
         }
     }
 
-    private GameObject GetLeftTile ()
+    private void Initialize()
+    {
+        m_UpTile = GetUpTile();
+        m_DownTile = GetDownTile();
+        m_RightTile = GetRightTile();
+        m_LeftTile = GetLeftTile();
+    }
+
+    //Storing Adjacent Tiles
+    private TileField GetLeftTile ()
     {
         RaycastHit hit;
         Ray ray = new Ray (transform.position, Vector3.left);
         if (Physics.Raycast (ray, out hit, 1, Board.Instance.whatIsTile))
-        {
-            if (hit.collider != null)
-            {
-                return hit.collider.gameObject;
-            }
-        }
+            return hit.collider?.GetComponent<TileField>();
 
         return null;
     }
 
-    private GameObject GetRightTile ()
+    private TileField GetRightTile ()
     {
         RaycastHit hit;
         Ray ray = new Ray (transform.position, Vector3.right);
         if (Physics.Raycast (ray, out hit, 1, Board.Instance.whatIsTile))
-        {
-            if (hit.collider != null)
-            {
-                return hit.collider.gameObject;
-            }
-        }
+            return hit.collider?.GetComponent<TileField>();
 
         return null;
     }
 
-    private GameObject GetUpTile ()
+    private TileField GetUpTile ()
     {
         RaycastHit hit;
-        Ray ray = new Ray (transform.position, Vector3.up);
+        Ray ray = new Ray (transform.position, Vector3.forward);
         if (Physics.Raycast (ray, out hit, 1, Board.Instance.whatIsTile))
-        {
-            if (hit.collider != null)
-            {
-                return hit.collider.gameObject;
-            }
-        }
+            return hit.collider?.GetComponent<TileField>();
 
         return null;
     }
 
-    private GameObject GetDownTile ()
+    private TileField GetDownTile ()
     {
         RaycastHit hit;
-        Ray ray = new Ray (transform.position, Vector3.down);
+        Ray ray = new Ray (transform.position, Vector3.back);
         if (Physics.Raycast (ray, out hit, 1, Board.Instance.whatIsTile))
-        {
-            if (hit.collider != null)
-            {
-                return hit.collider.gameObject;
-            }
-        }
+            return hit.collider?.GetComponent<TileField>();
 
         return null;
-    }
-
-    public void RemovePiece ()
-    {
-        this.token = null;
-    }
-
-    public void Verify ()
-    {
-        var tile = GetUpTile ();
-        if (tile != null)
-        {
-            var upField = tile.GetComponent<TileField> ();
-            if (upField.token == null)
-            {
-                moveUpField = upField;
-            }
-            else
-                moveUpField = null;
-        }
-
-        tile = GetDownTile ();
-        if (tile != null)
-        {
-            var downField = tile.GetComponent<TileField> ();
-            if (downField.token == null)
-            {
-                moveDownField = downField;
-            }
-            else
-                moveDownField = null;
-        }
-
-        tile = GetLeftTile ();
-        if (tile != null)
-        {
-            var leftField = tile.GetComponent<TileField> ();
-            if (leftField.token == null)
-            {
-                moveLeftField = leftField;
-            }
-            else
-                moveLeftField = null;
-        }
-        tile = GetRightTile ();
-        if (tile != null)
-        {
-            var rightField = tile.GetComponent<TileField> ();
-            if (rightField.token == null)
-            {
-                moveRightField = rightField;
-            }
-            else
-                moveRightField = null;
-        }
     }
 
     //WORKING
-    public void GetToken ()
+    public void CheckForPiece()
     {
         RaycastHit hit;
-        Ray ray = new Ray (this.transform.position, Vector3.back);
+        Ray ray = new Ray (this.transform.position, Vector3.up);
         if (Physics.Raycast (ray, out hit, 2, Board.Instance.whatIsPiece))
         {
             if (hit.collider != null)
             {
-                Debug.DrawRay (this.transform.position, Vector3.back, Color.red, 1000000);
-                Debug.Log ("this tile :" + this.gameObject.name + " Hitted " + hit.collider.name);
-                this.token = hit.collider.GetComponent<Token> ();
+                this.piece = hit.collider.GetComponent<Piece> ();
             }
         }
         else
         {
-            Debug.DrawRay (this.transform.position, Vector3.back, Color.green, 1000000);
-            Debug.Log ("Column :" + this.column + " Line :" + this.line + " null");
-            this.token = null;
+            Debug.Log("No token found above " + this.gameObject.name);
+            this.piece = null;
         }
+    }
+
+    public void RemovePiece ()
+    {
+        this.piece = null;
     }
     //END WORKING
 
-    public void HighlightEmptyNeighbors ()
+    //Called when a piece is moved to this tile
+    //CHANGE
+    public IEnumerator PieceMoved ()
     {
-        if (this.highlighting)
-        {
-            DehighlightNeighbors ();
-            return;
-        }
+        board.IsUpdating = true;
+        board.NewMovementOccured ();
 
-        Board.Instance.DehighlightAll ();
-
-        this.highlighting = true;
-        Board.Instance.highlightedField = GetComponent<TileField> ();
-
-        if (moveUpField != null)
-        {
-            moveUpField.GetComponent<Renderer> ().material.color = Board.Instance.highlighColor;
-        }
-
-        if (moveDownField != null)
-        {
-            moveDownField.GetComponent<Renderer> ().material.color = Board.Instance.highlighColor;
-        }
-
-        if (moveLeftField != null)
-        {
-            moveLeftField.GetComponent<Renderer> ().material.color = Board.Instance.highlighColor;
-        }
-
-        if (moveRightField != null)
-        {
-            moveRightField.GetComponent<Renderer> ().material.color = Board.Instance.highlighColor;
-        }
-    }
-
-    //A piece moved to this tile
-    //TODO: CHANGE
-    public IEnumerator TokenMoved ()
-    {
-        Board.Instance.IsUpdating = true;
-
-        Board.Instance.DehighlightAll ();
-        Board.Instance.highlightedField.token.MoveTo (this);
+        board.HighlightedField.piece.MoveTo (this);
+        board.DehighlightAll ();
 
         yield return new WaitForSeconds (.7f);
+        Debug.Log("this game object " + this.gameObject.name);
+        CheckForPiece ();
+        Debug.Log(piece);
 
-        GetToken ();
+        board.HighlightedField = this;
 
-        Board.Instance.newMovementOccured ();
-        Board.Instance.highlightedField = this;
-        this.token.movemented = true;
-
-        if (this.column == "c" && this.line == 3)
-        {
-            this.token.isMiddle = true;
-        }
+        if (column == "c" && line == 3)
+            piece.isMiddle = true;
         else
-            this.token.isMiddle = false;
+            piece.isMiddle = false;
 
         Board.Instance.UpdateBoard ();
     }
 
-    public void DehighlightNeighbors ()
+    //Highlight all empty Adjacent Tiles that has no Piece, in order to show which tile is currently avaiable to move
+    public void HighlightEmptyAdjacents ()
+    {
+        board.DehighlightAll ();
+
+        highlighting = true;
+        board.HighlightedField = this;
+
+        if(CanMoveUp)
+        {
+            if(m_UpTile.fieldColor == FieldColor.WHITE)
+                m_UpTile.Highlight();
+            else
+                m_UpTile.Highlight(false);
+        }
+
+        if(CanMoveDown)
+        {
+            if(m_DownTile.fieldColor == FieldColor.WHITE)
+                m_DownTile.Highlight();
+            else
+                m_DownTile.Highlight(false);
+        }
+
+        if(CanMoveRight)
+        {
+            if(m_RightTile.fieldColor == FieldColor.WHITE)
+                m_RightTile.Highlight();
+            else
+                m_RightTile.Highlight(false);
+        }
+
+        if(CanMoveLeft)
+        {
+            if(m_LeftTile.fieldColor == FieldColor.WHITE)
+                m_LeftTile.Highlight();
+            else
+                m_LeftTile.Highlight(false);
+        }
+    }
+
+    //Dehighlight all adjacent tiles
+    public void DehighlightAdjacents ()
     {
         this.highlighting = false;
+        board.HighlightedField = null;
 
-        var tile = GetUpTile ();
-        if (tile != null)
+        if(CanMoveUp)
         {
-            tile.GetComponent<Renderer> ().material.color = Board.Instance.normalColor;
-        }
-
-        tile = GetDownTile ();
-        if (tile != null)
-        {
-            tile.GetComponent<Renderer> ().material.color = Board.Instance.normalColor;
+            if(m_UpTile.fieldColor == FieldColor.WHITE)
+                m_UpTile.Dehighlight();
+            else
+                m_UpTile.Dehighlight(false);
         }
 
-        tile = GetLeftTile ();
-        if (tile != null)
+        if(CanMoveDown)
         {
-            tile.GetComponent<Renderer> ().material.color = Board.Instance.normalColor;
+            if(m_DownTile.fieldColor == FieldColor.WHITE)
+                m_DownTile.Dehighlight();
+            else
+                m_DownTile.Dehighlight(false);
         }
-        tile = GetRightTile ();
-        if (tile != null)
+
+        if(CanMoveRight)
         {
-            tile.GetComponent<Renderer> ().material.color = Board.Instance.normalColor;
+            if(m_RightTile.fieldColor == FieldColor.WHITE)
+                m_RightTile.Dehighlight();
+            else
+                m_RightTile.Dehighlight(false);
         }
+
+        if(CanMoveLeft)
+        {
+            if(m_LeftTile.fieldColor == FieldColor.WHITE)
+                m_LeftTile.Dehighlight();
+            else
+                m_LeftTile.Dehighlight(false);
+        }
+    }
+
+    //highlighting this tile by changing its material
+    private void Highlight(bool isWhite = true)
+    {
+        if(isWhite)
+            meshRenderer.material = board.whiteHighlightMaterial;
+        else
+            meshRenderer.material = board.blackHighlightMaterial;
+    }
+
+    //dehighlighting this tile by changing its material
+    private void Dehighlight(bool isWhite = true)
+    {
+        if(isWhite)
+            meshRenderer.material = board.whiteNormalMaterial;
+        else
+            meshRenderer.material = board.blackNormalMaterial;
     }
 }
