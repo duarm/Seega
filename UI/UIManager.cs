@@ -59,9 +59,9 @@ public class UIManager : MonoBehaviour
     public void SurrenderButton ()
     {
         if (Board.Instance.CurrentTurn == Turn.WHITE)
-            Board.Instance.EndGame (TokenType.BLACK, VictoryType.GREAT);
+            Board.Instance.EndGame (PieceType.BLACK, VictoryType.GREAT);
         else
-            Board.Instance.EndGame (TokenType.WHITE, VictoryType.GREAT);
+            Board.Instance.EndGame (PieceType.WHITE, VictoryType.GREAT);
     }
 
     public void UpdateTurnUI ()
@@ -94,5 +94,10 @@ public class UIManager : MonoBehaviour
             stateText.text = states[1];
             surrenderButton.SetActive (true);
         }
+    }
+
+    public void InvertActive(GameObject objectToInvert)
+    {
+        objectToInvert.SetActive(!objectToInvert.activeInHierarchy);
     }
 }

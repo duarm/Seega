@@ -27,8 +27,6 @@ public class SceneController : MonoBehaviour
 
     protected static SceneController s_Instance;
 
-    public Button restartButton;
-
     public static void Create ()
     {
         GameObject screenFaderGameObject = new GameObject ("SceneController");
@@ -47,18 +45,56 @@ public class SceneController : MonoBehaviour
     }
     #endregion
 
+    AsyncOperation async;
+
     public void RestartScene ()
     {
         if (ScreenFader.IsFading)
             return;
 
-        StartCoroutine (Restart ());
+        StartCoroutine (Restart());
     }
 
-    private IEnumerator Restart ()
+    public void QuitGame()
     {
-        yield return StartCoroutine (ScreenFader.FadeSceneOut (1, 1));
-        yield return SceneManager.LoadSceneAsync (SceneManager.GetActiveScene ().name);
-        yield return StartCoroutine (ScreenFader.FadeSceneIn (0, 1));
+        if (ScreenFader.IsFading)
+            return;
+            
+        StartCoroutine(Quit());
     }
+
+    public IEnumerator LoadLevel(Slider slider, GameObject text, GameObject loadBar)
+	{
+		yield return StartCoroutine(ScreenFader.FadeSceneOut());
+		text.SetActive(false);
+
+		ScreenFader.SetAlpha(0);
+		loadBar.SetActive(true);
+		async = SceneManager.LoadSceneAsync(1);
+		async.allowSceneActivation = false;
+
+		while(!async.isDone)
+		{
+			slider.value = async.progress;
+			if(async.progress == 0.9f)
+			{
+				slider.value = 1f;
+				async.allowSceneActivation = true;
+			}
+			yield return null;
+		}
+	}
+
+    IEnumerator Quit()
+    {
+        yield return StartCoroutine(ScreenFader.FadeSceneOut());
+        Application.Quit();
+    }
+
+    IEnumerator Restart()
+	{
+		yield return StartCoroutine(ScreenFader.FadeSceneOut());
+		yield return SceneManager.LoadSceneAsync ("Game");
+		yield return StartCoroutine(ScreenFader.FadeSceneIn());
+	}
 }
