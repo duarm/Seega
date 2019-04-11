@@ -21,9 +21,14 @@ public class TileField : MonoBehaviour
     public bool highlighting = false;
     public Piece piece;
 
-    private MeshRenderer meshRenderer;
+    TileField m_UpTile;
+    TileField m_DownTile;
+    TileField m_RightTile;
+    TileField m_LeftTile;
+    Board m_Board;
+    MeshRenderer m_MeshRenderer;
 
-    public bool CanMoveUp
+     public bool CanMoveUp
     {
         get 
         { 
@@ -79,22 +84,16 @@ public class TileField : MonoBehaviour
         get { return m_LeftTile; }
     }
 
-    TileField m_UpTile;
-    TileField m_DownTile;
-    TileField m_RightTile;
-    TileField m_LeftTile;
-    Board board;
-
     private void Start() 
     {
-        board = Board.Instance;
-        meshRenderer = GetComponent<MeshRenderer>();
+        m_Board = Board.Instance;
+        m_MeshRenderer = GetComponent<MeshRenderer>();
         Initialize();
     }
 
     private void OnMouseDown ()
     {
-        if (Board.Instance.CurrentState == GameState.POSITIONING && !board.IsUpdating)
+        if (Board.Instance.CurrentState == GameState.POSITIONING && !m_Board.IsUpdating)
         {
             if (piece != null)
                 return;
@@ -102,9 +101,9 @@ public class TileField : MonoBehaviour
             if (this.column == "c" && this.line == 3)
                 return;
 
-            if (board.CurrentTurn == Turn.BLACK)
+            if (m_Board.CurrentTurn == Turn.BLACK)
             {
-                Piece piece = board.GetNonPlacedBlackPiece();
+                Piece piece = m_Board.GetNonPlacedBlackPiece();
                 if (piece != null)
                 {
                     //teleporting the piece to the right place
@@ -204,27 +203,25 @@ public class TileField : MonoBehaviour
     }
     //END WORKING
 
-    //Called when a piece is moved to this tile
     //CHANGE
+    //Called when a piece is moved to this tile
     public IEnumerator PieceMoved ()
     {
-        board.IsUpdating = true;
-        board.NewMovementOccured ();
+        m_Board.IsUpdating = true;
+        m_Board.NewMovementOccured ();
 
-        board.HighlightedField.piece.MoveTo (this);
-        board.DehighlightAll ();
+        m_Board.HighlightedField.piece.MoveTo (this);
+        m_Board.DehighlightAll ();
 
         yield return new WaitForSeconds (.7f);
-        Debug.Log("this game object " + this.gameObject.name);
         CheckForPiece ();
-        Debug.Log(piece);
 
-        board.HighlightedField = this;
+        m_Board.HighlightedField = this;
 
         if (column == "c" && line == 3)
-            piece.isMiddle = true;
+            piece.inMiddle = true;
         else
-            piece.isMiddle = false;
+            piece.inMiddle = false;
 
         Board.Instance.UpdateBoard ();
     }
@@ -232,10 +229,10 @@ public class TileField : MonoBehaviour
     //Highlight all empty Adjacent Tiles that has no Piece, in order to show which tile is currently avaiable to move
     public void HighlightEmptyAdjacents ()
     {
-        board.DehighlightAll ();
+        m_Board.DehighlightAll ();
 
         highlighting = true;
-        board.HighlightedField = this;
+        m_Board.HighlightedField = this;
 
         if(CanMoveUp)
         {
@@ -274,7 +271,7 @@ public class TileField : MonoBehaviour
     public void DehighlightAdjacents ()
     {
         this.highlighting = false;
-        board.HighlightedField = null;
+        m_Board.HighlightedField = null;
 
         if(CanMoveUp)
         {
@@ -313,17 +310,17 @@ public class TileField : MonoBehaviour
     private void Highlight(bool isWhite = true)
     {
         if(isWhite)
-            meshRenderer.material = board.whiteHighlightMaterial;
+            m_MeshRenderer.material = m_Board.whiteHighlightMaterial;
         else
-            meshRenderer.material = board.blackHighlightMaterial;
+            m_MeshRenderer.material = m_Board.blackHighlightMaterial;
     }
 
     //dehighlighting this tile by changing its material
     private void Dehighlight(bool isWhite = true)
     {
         if(isWhite)
-            meshRenderer.material = board.whiteNormalMaterial;
+            m_MeshRenderer.material = m_Board.whiteNormalMaterial;
         else
-            meshRenderer.material = board.blackNormalMaterial;
+            m_MeshRenderer.material = m_Board.blackNormalMaterial;
     }
 }

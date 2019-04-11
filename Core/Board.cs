@@ -214,25 +214,25 @@ public class Board : MonoBehaviour
         if (m_HighlightedTile.CanMoveUp)
         {
             if(m_HighlightedTile.UpTile == moveField)
-                return true; Debug.Log("Moving to Up: " + moveField);
+                return true;
         }
 
         if (m_HighlightedTile.CanMoveDown)
         {
             if(m_HighlightedTile.DownTile == moveField)
-                return true; Debug.Log("Moving to Down: " + moveField);
+                return true;
         }
 
         if (m_HighlightedTile.CanMoveRight)
         {
             if(m_HighlightedTile.RightTile == moveField)
-                return true; Debug.Log("Moving to Right: " + moveField);
+                return true;
         }
 
         if (m_HighlightedTile.CanMoveLeft)
         {
             if(m_HighlightedTile.LeftTile == moveField)
-                return true; Debug.Log("Moving to Left: " + moveField);
+                return true;
         }
 
         return false;
@@ -251,7 +251,7 @@ public class Board : MonoBehaviour
         {
             if (piece != null)
             {
-                if (piece.Verify () > 0)
+                if (piece.VerifyAll () > 0)
                     yield return fieldUpdateRate;
             }
         }
@@ -357,26 +357,16 @@ public class Board : MonoBehaviour
         if (m_CurrentTurn == Turn.WHITE)
         {
             if (LastpieceIsPlaced (PieceType.BLACK))
-            {
-                Debug.Log ("Starting Phase");
                 StartMovementPhase ();
-            }
             else
-            {
                 NextTurn ();
-            }
         }
         else
         {
             if (LastpieceIsPlaced (PieceType.WHITE))
-            {
-                Debug.Log ("Starting Phase");
                 StartMovementPhase ();
-            }
             else
-            {
                 NextTurn ();
-            }
         }
     }
 
@@ -490,12 +480,12 @@ public class Board : MonoBehaviour
     {
         foreach (Piece piece in m_WhitePieces)
         {
-            piece.Verify ();
+            piece.VerifyAll ();
         }
 
         foreach (Piece piece in m_BlackPieces)
         {
-            piece.Verify ();
+            piece.VerifyAll ();
         }
     }
 
@@ -505,9 +495,9 @@ public class Board : MonoBehaviour
         {
             if (piece != null)
             {
-                piece.turnCaptures = 0;
+                //piece.turnCaptures = 0;
                 piece.movemented = false;
-                piece.isCapturingSequence = false;
+                //piece.isCapturingSequence = false;
             }
         }
     }
