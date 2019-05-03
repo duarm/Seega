@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public enum PieceType
 {
@@ -10,7 +11,7 @@ public enum PieceType
 
 public class Piece : MonoBehaviour
 {
-    public bool placed;
+    public bool isPlaced;
     public PieceType type;
     public bool movemented;
     public bool inMiddle;
@@ -24,71 +25,29 @@ public class Piece : MonoBehaviour
         m_DeathParticle = GetComponentInChildren<ParticleSystem>();
     }
 
-    public void Teleport (Vector3 position)
+    public void Teleport (TileField tile)
     {
-        this.transform.position = position;
-        placed = true;
+        transform.position = new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z);
+        isPlaced = true;
         movemented = true;
     }
 
     public void MoveTo (TileField tile)
     {
-        iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z), .7f);
-        placed = true;
+        iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z), .3f);
+        isPlaced = true;
         movemented = true;
     }
 
-    private int Verify(Vector3 direction)
+    private void CheckForWall (ref Piece[] pieces)
     {
-        //Two arrays for organizational purposes
-        RaycastHit[] hits;
-        RaycastHit[] wallHits;
-        hits = Physics.RaycastAll (this.transform.position, direction, 2, Board.Instance.whatIsPiece);
-        wallHits = Physics.RaycastAll (this.transform.position, direction, 4, Board.Instance.whatIsPiece);
-
-        if (hits == null)
-            return 0;
-
-        //Filling both with the hits
-        Piece[] hittedPiece = new Piece[2];
-
-        for (int i = 0; i < hits.Length; i++)
-        {
-            hittedPiece[i] = hits[i].collider.GetComponent<Piece> ();
-        }
-
-        Piece[] wallPieces = new Piece[4];
-
-        for (int i = 0; i < wallHits.Length; i++)
-        {
-            wallPieces[i] = wallHits[i].collider.GetComponent<Piece> ();
-        }
-
-        //Checking for a wall play
-        CheckForWall (wallPieces);
-
-        if (hittedPiece[0] == null | hittedPiece[1] == null)
-            return 0;
-
-        if (MatchCaptureConditions (hittedPiece))
-        {
-            hittedPiece[0].Capture ();
-            //this.turnCaptures++;
-            return 1;
-        }
-
-        return 0;
-    }
-
-    private void CheckForWall (Piece[] pieces)
-    {
-        //the wall is a 5 piece play, lets be sure we have all of them
-        if ((pieces[0] ?? pieces[1] ?? pieces[2] ?? pieces[3]) != null)
+        //if ((pieces[0] ?? pieces[1] ?? pieces[2] ?? pieces[3]) != null)
+        if (pieces.All(s => s == null))
         {
             if(this.type == PieceType.WHITE)
             {
                 //the wall consists in 5 SAME COLOR pieces along a whole column or line
-                if (IsAllPieceType(pieces, PieceType.WHITE))
+                if (IsAllPieceType(ref pieces, PieceType.WHITE))
                 {
                     StopAllCoroutines ();
                     Board.Instance.EndGame (PieceType.WHITE, VictoryType.MINOR);
@@ -96,7 +55,7 @@ public class Piece : MonoBehaviour
             }
             else
             {
-                if (IsAllPieceType(pieces, PieceType.BLACK))
+                if (IsAllPieceType(ref pieces, PieceType.BLACK))
                 {
                     StopAllCoroutines ();
                     Board.Instance.EndGame (PieceType.BLACK, VictoryType.MINOR);
@@ -105,7 +64,7 @@ public class Piece : MonoBehaviour
         }
     }
 
-    private bool IsAllPieceType(Piece[] pieces, PieceType type)
+    private bool IsAllPieceType(ref Piece[] pieces, PieceType type)
     {
         if (pieces[0].type == type &&
             pieces[1].type == type &&
@@ -132,16 +91,6 @@ public class Piece : MonoBehaviour
         }
 
         return false;
-    }
-
-    public int VerifyAll ()
-    {
-        int killCounter = 0;
-        killCounter += Verify(Vector3.forward);
-        killCounter += Verify(Vector3.back);
-        killCounter += Verify(Vector3.left);
-        killCounter += Verify(Vector3.right);
-        return killCounter;
     }
 
     public void Capture ()

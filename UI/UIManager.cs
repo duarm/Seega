@@ -28,17 +28,11 @@ public class UIManager : MonoBehaviour
     public void Starting (int starting)
     {
         if (starting == 0)
-        {
-            Board.Instance.CurrentTurn = Turn.WHITE;
-        }
+            Board.Instance.IsWhiteTurn = true;
         else if (starting == 1)
-        {
-            Board.Instance.CurrentTurn = Turn.BLACK;
-        }
+            Board.Instance.IsWhiteTurn = false;
         else
-        {
             Debug.LogError ("Invalid choice index, check the Button parameter");
-        }
 
         Board.Instance.StartPositioningPhase ();
     }
@@ -58,7 +52,7 @@ public class UIManager : MonoBehaviour
 
     public void SurrenderButton ()
     {
-        if (Board.Instance.CurrentTurn == Turn.WHITE)
+        if (Board.Instance.IsWhiteTurn)
             Board.Instance.EndGame (PieceType.BLACK, VictoryType.GREAT);
         else
             Board.Instance.EndGame (PieceType.WHITE, VictoryType.GREAT);
@@ -69,13 +63,13 @@ public class UIManager : MonoBehaviour
         if (turnText == null)
             Debug.LogError ("Turn Text display is null, verify the Editor reference.");
 
-        if (Board.Instance.CurrentTurn == Turn.WHITE)
+        if (Board.Instance.IsWhiteTurn)
         {
-            turnText.text = turns[0];
+            turnText.text = turns[1];
         }
         else
         {
-            turnText.text = turns[1];
+            turnText.text = turns[0];
         }
     }
 
