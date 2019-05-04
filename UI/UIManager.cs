@@ -25,18 +25,6 @@ public class UIManager : MonoBehaviour
         Board.Instance.onGameEndCallback += ActivateEndWindow;
     }
 
-    public void Starting (int starting)
-    {
-        if (starting == 0)
-            Board.Instance.IsWhiteTurn = true;
-        else if (starting == 1)
-            Board.Instance.IsWhiteTurn = false;
-        else
-            Debug.LogError ("Invalid choice index, check the Button parameter");
-
-        Board.Instance.StartPositioningPhase ();
-    }
-
     public void RestartButton ()
     {
         SceneController.Instance.RestartScene ();
@@ -50,46 +38,26 @@ public class UIManager : MonoBehaviour
         victoryTypeText.text = winType;
     }
 
-    public void SurrenderButton ()
+    public void UpdateTurnUI (bool isWhiteTurn)
     {
-        if (Board.Instance.IsWhiteTurn)
-            Board.Instance.EndGame (PieceType.BLACK, VictoryType.GREAT);
-        else
-            Board.Instance.EndGame (PieceType.WHITE, VictoryType.GREAT);
-    }
-
-    public void UpdateTurnUI ()
-    {
-        if (turnText == null)
-            Debug.LogError ("Turn Text display is null, verify the Editor reference.");
-
-        if (Board.Instance.IsWhiteTurn)
-        {
-            turnText.text = turns[1];
-        }
-        else
-        {
+        if (isWhiteTurn)
             turnText.text = turns[0];
-        }
+        else
+            turnText.text = turns[1];
     }
 
-    public void UpdateStateUI ()
+    public void UpdateStateUI (GameState state)
     {
-        if (stateText == null)
-            Debug.LogError ("State Text display is null, verify the Editor reference.");
-
-        if (Board.Instance.CurrentState == GameState.POSITIONING)
-        {
-            stateText.text = states[0];
-        }
-        else if (Board.Instance.CurrentState == GameState.MOVEMENT)
-        {
-            Debug.Log ("Turning on Surrender");
-            stateText.text = states[1];
+        if(!surrenderButton.activeInHierarchy)
             surrenderButton.SetActive (true);
-        }
+
+        if (state == GameState.POSITIONING)
+            stateText.text = states[0];
+        else if (state == GameState.MOVEMENT)
+            stateText.text = states[1];
     }
 
+    //Called by the Help Button
     public void InvertActive(GameObject objectToInvert)
     {
         objectToInvert.SetActive(!objectToInvert.activeInHierarchy);

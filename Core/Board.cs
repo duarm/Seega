@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Linq;
 using Kurenaiz.Utilities.Physics;
 using Kurenaiz.Utilities.Types;
+using System;
 
 public enum GameState
 {
@@ -45,6 +46,8 @@ public class Board : MonoBehaviour
     int m_TurnIndex;
     bool m_IsWhiteTurn;
     int m_PieceIndex;
+    int m_WhiteKillCount;
+    int m_BlackKillCount;
 
     WaitForSeconds m_FieldUpdateRate;
     TileField m_HighlightedTile;     //Keep track of the current selected piece
@@ -56,17 +59,6 @@ public class Board : MonoBehaviour
     {
         get { return m_IsUpdating; }
         set { m_IsUpdating = value; }
-    }
-
-    public bool IsHighlighting
-    {
-        get { return m_HighlightedTile != null; }
-    }
-
-    public TileField HighlightedField
-    {
-        get{ return m_HighlightedTile; }
-        set{ m_HighlightedTile = value; }
     }
 
     public bool IsWhiteTurn
@@ -81,10 +73,10 @@ public class Board : MonoBehaviour
         set { m_CurrentGameState = value; }
     }
 
-    public delegate void OnTurnChange ();
+    public delegate void OnTurnChange (bool isWhiteTurn);
     public OnTurnChange onTurnChangeCallback;
 
-    public delegate void OnStateChange ();
+    public delegate void OnStateChange (GameState state);
     public OnStateChange onStateChangeCallback;
 
     public delegate void OnGameEnd (string winner, string winType);
@@ -92,17 +84,18 @@ public class Board : MonoBehaviour
 
     void Awake ()
     {
+        Debug.Log("Awaking");
         s_BoardInstance = this;
     }
 
     void Start ()
     {
+        Debug.Log("Starting");
         m_CurrentGameState = GameState.STARTING;
         m_FieldUpdateRate = new WaitForSeconds (fieldUpdateTime);
         PopulateArrays();
     }
 
-    //IMPLEMENT COMPONENT CACHING
     void Update ()
     {
         if (Input.GetMouseButtonDown (0) && !m_IsUpdating)
@@ -116,10 +109,6 @@ public class Board : MonoBehaviour
                 PhysicsHelper.TryGetTileField(hit.collider, out tile);
                 if (m_CurrentGameState == GameState.MOVEMENT)
                 {
-                    // Debug.Log("Clicked  Tiled: " + tile.name);
-                    // Debug.Log("Clicked Tile Ray: " + tile.ToString());
-                    // Debug.Log("Clicked Tile Array: " + m_Fields[tile.Row, tile.Column].ToString());
-
                     //Two possibilities: the field can or not have a piece
                     if (tile.Piece != null)
                     {
@@ -147,44 +136,46 @@ public class Board : MonoBehaviour
                         //One possibilities: if there is not a piece on the field we clicked, and we already have a highlighted field, we try to move
                         if (m_HighlightedTile != null)
                         {
-                            //Debug.Log(m_HighlightedTile);
-                            //Debug.Log("Calling Piece Moved of :" + tile.gameObject.name);
                             //MOVE PIECE
                             if(tile.highlighting)
                             {
                                 //If this tile is highlighted, we can move to this tile.
+                                m_HighlightedTile.MovePieceTo(tile);
+                                UpdateBoard(tile, m_HighlightedTile);
+                                Dehighlight();
+                                NextTurn();
                             }
                         }
                     }
                 }
                 else if (m_CurrentGameState == GameState.POSITIONING)
                 {
-                    //Debug.Log("Clicked Tile Ray: " + tile.ToString());
-                    //Debug.Log("Clicked Tile Array: " + tile.ToString());
-                    if(tile.Piece != null)
-                        return;
-
-                    //No piece can be put in the middle on the positioning phase
-                    if(tile.Row == 2 && tile.Column == 2)
-                        return;
-
-                    if (m_IsWhiteTurn)
-                        tile.Piece = GetNonPlacedWhitePiece();
-                    else
-                        tile.Piece = GetNonPlacedBlackPiece();
-
-                    m_TurnIndex++;
-
-                    // Each player places 2 pieces before the next turn
-                    if(m_TurnIndex == 2)
+                    //One Possibility: There's no piece on the field, we can only move to an empty space
+                    if(tile.Piece == null)
                     {
-                        m_TurnIndex = 0;
-                        NextTurn ();
-                    }
+                        //Debug.Log("Theres no a piece");
+                        //No piece can be put in the middle on the positioning phase
+                        if(tile.Row == 2 && tile.Column == 2)
+                            return;
 
-                    //24 is the number of pieces
-                    if(m_PieceIndex == 24)
-                        StartMovementPhase();
+                        if (m_IsWhiteTurn)
+                            tile.SetPiece(GetNonPlacedWhitePiece());
+                        else
+                            tile.SetPiece(GetNonPlacedBlackPiece());
+
+                        m_TurnIndex++;
+
+                        // Each player places 2 pieces before the next turn
+                        if(m_TurnIndex == 2)
+                        {
+                            m_TurnIndex = 0;
+                            NextTurn ();
+                        }
+
+                        //24 is the number of pieces
+                        if(m_PieceIndex == 24)
+                            StartMovementPhase();
+                    }
                 }
             }
         }
@@ -192,35 +183,36 @@ public class Board : MonoBehaviour
 
     private void Dehighlight()
     {
-        Debug.Log("Dehighlighting");
-        Debug.Log(m_HighlightedTile);
+        //Debug.Log("Dehighlighting");
+        //Debug.Log(m_HighlightedTile);
 
         TileField field;
+
         field = m_Fields[m_HighlightedTile.Row + 1, m_HighlightedTile.Column];
         if(field?.highlighting == true)
         {
-            Debug.Log(field.ToString());
+            //Debug.Log(field.ToString());
             field.Dehighlight();
         }
 
         field = m_Fields[m_HighlightedTile.Row - 1, m_HighlightedTile.Column];
         if(field?.highlighting == true)
         {
-            Debug.Log(field.ToString());
+            //Debug.Log(field.ToString());
             field.Dehighlight();
         }
 
         field = m_Fields[m_HighlightedTile.Row, m_HighlightedTile.Column + 1];
         if(field?.highlighting == true)
         {
-            Debug.Log(field.ToString());
+            //Debug.Log(field.ToString());
             field.Dehighlight();
         }
 
         field = m_Fields[m_HighlightedTile.Row, m_HighlightedTile.Column - 1];
         if(field?.highlighting == true)
         {
-            Debug.Log(field.ToString());
+            //Debug.Log(field.ToString());
             field.Dehighlight();
         }
 
@@ -281,6 +273,7 @@ public class Board : MonoBehaviour
     {
         int row = 0;
         int column = 0;
+        bool isWhite = true;
         foreach (Transform field in tileFieldParent)
         {
             if(row == 5)
@@ -289,7 +282,8 @@ public class Board : MonoBehaviour
                 row=0;
             }
 
-            m_Fields[row,column] = field.GetComponent<TileField>().Initialize(row, column);
+            m_Fields[row,column] = field.GetComponent<TileField>().Initialize(row, column, isWhite);
+            isWhite = !isWhite;
             row++;
         }
 
@@ -315,88 +309,221 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    private bool ValidateMovement (TileField moveField)
+    public void UpdateBoard (TileField currentField, TileField lastField)
     {
-        
+        bool movedVertically = currentField.Row > lastField.Row || currentField.Row < lastField.Row;
 
-        return false;
+        VerifyWall(currentField, movedVertically);
+        VerifyCapture(currentField);
+        VerifyKills();
     }
 
-    public void UpdateBoard ()
+    private void VerifyKills()
     {
-        //StartCoroutine (Updater ());
+        if(m_WhiteKillCount == 12)
+            EndGame(true, VictoryType.TOTAL);
+        else if(m_BlackKillCount == 12)
+            EndGame(false, VictoryType.TOTAL);
     }
 
-    /*
-    IEnumerator Updater ()
+    private void VerifyCapture(TileField currentField)
     {
-        UpdatePieces ();
-
-        foreach (Piece piece in m_Pieces)
-        {
-            if (piece != null)
-            {
-                if (piece.VerifyAll () > 0)
-                    yield return fieldUpdateRate;
-            }
-        }
-
-        UpdatePieces ();
-
-        int count = 0;
-        foreach (Piece piece in m_WhitePieces)
-        {
-            if (piece == null)
-            {
-                count++;
-            }
-        }
-
-        if (count == 12)
-        {
-            EndGame (PieceType.BLACK, VictoryType.TOTAL);
-            yield return null;
-        }
-        else
-            count = 0;
-
-        foreach (Piece piece in m_BlackPieces)
-        {
-            if (piece == null)
-            {
-                count++;
-            }
-        }
-
-        if (count == 12)
-        {
-            EndGame (PieceType.WHITE, VictoryType.TOTAL);
-        }
-
-        NextTurn ();
-        /*
-        if (m_HighlightedTile.piece.turnCaptures == 0)
-        {
-            NextTurn ();
-        }
-        else
-        {
-            m_HighlightedTile.HighlightEmptyAdjacents ();
-            m_HighlightedTile.piece.isCapturingSequence = true;
-        }
-
-
-        isUpdating = false;
-    }*/
-
-    public void EndGame (PieceType winner, VictoryType victoryType)
-    {
-        if (onGameEndCallback == null)
+        //Pieces on the middle can't be captured
+        if(currentField.Row == 2 && currentField.Column == 2)
             return;
 
+        //TO IMPLEMENT: No need to check for capture in the direction the piece came from
+        TryCapture(currentField);
+    }
+
+    private void TryCapture(TileField currentField)
+    {
+        PieceType currentPieceType = IsWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
+        int index;
+
+        index = currentField.Row + 1;
+        if(index <= 4)
+        {
+            TileField fieldToCheck = m_Fields[index, currentField.Column];
+            //One Field above current field
+            if(fieldToCheck.Piece != null)
+            {
+                bool captureConditionMatch = false;
+                //Two Fields above current field
+                if(m_Fields[index + 1, currentField.Column]?.Piece?.type == currentPieceType)
+                {
+                    captureConditionMatch = true;
+                }
+
+                if(fieldToCheck.Piece.type != currentPieceType && captureConditionMatch)
+                {
+                    fieldToCheck.Capture();
+
+                    if(currentPieceType == PieceType.WHITE)
+                        m_WhiteKillCount++;
+                    else
+                        m_BlackKillCount++;
+                }
+            }
+        }
+
+        index = currentField.Row - 1;
+        if(index >= 0)
+        {
+            TileField fieldToCheck = m_Fields[index, currentField.Column];
+            //One Field current field
+            if(fieldToCheck.Piece != null)
+            {
+                bool captureConditionMatch = false;
+                //Two Fields below current field
+                if(m_Fields[index - 1, currentField.Column]?.Piece?.type == currentPieceType)
+                {
+                    captureConditionMatch = true;
+                }
+
+                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                {
+                    fieldToCheck.Capture();
+
+                    if(currentPieceType == PieceType.WHITE)
+                        m_WhiteKillCount++;
+                    else
+                        m_BlackKillCount++;
+                }
+            }
+        }
+
+        index = currentField.Column + 1;
+        if(index <= 4)
+        {
+            TileField fieldToCheck = m_Fields[currentField.Row, index];
+            //One Field to right of the current field
+            if(fieldToCheck.Piece != null)
+            {
+                bool captureConditionMatch = false;
+                //Two Fields to right of the current field
+                if(m_Fields[currentField.Row, index + 1]?.Piece?.type == currentPieceType)
+                {
+                    captureConditionMatch = true;
+                }
+
+                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                {
+                    fieldToCheck.Capture();
+
+                    if(currentPieceType == PieceType.WHITE)
+                        m_WhiteKillCount++;
+                    else
+                        m_BlackKillCount++;
+                }
+            }
+        }
+
+        index = currentField.Column - 1;
+        if(index >= 0)
+        {
+            TileField fieldToCheck = m_Fields[currentField.Row, index];
+            //One Field to left of the current field
+            if(fieldToCheck.Piece != null)
+            {
+                bool captureConditionMatch = false;
+                //Two Fields to left of the current field
+                if(m_Fields[currentField.Row, index - 1]?.Piece?.type == currentPieceType)
+                {
+                    captureConditionMatch = true;
+                }
+
+                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                {
+                    fieldToCheck.Capture();
+
+                    if(currentPieceType == PieceType.WHITE)
+                        m_WhiteKillCount++;
+                    else
+                        m_BlackKillCount++;
+                }
+            }
+        }
+    }
+
+    private void VerifyWall(TileField currentField, bool movedVertically)
+    {
+        //If the piece moved vertically, no need to check for a vertical wall
+        if(movedVertically)
+        {
+            if(HasHorizontalWall(currentField))
+                EndGame(m_IsWhiteTurn, VictoryType.MINOR);
+        }
+        else
+        {
+            if(HasVerticalWall(currentField))
+                EndGame(m_IsWhiteTurn, VictoryType.MINOR);
+        }
+    }
+
+    private bool HasVerticalWall(TileField currentField)
+    {
+        PieceType currentPieceType = IsWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
+        for(int i = 0; i < 5; i++)
+        {
+            int positiveIndex = currentField.Row + i;
+            if(positiveIndex <= 4)
+            {
+                if(!(currentPieceType == m_Fields[positiveIndex, currentField.Column].Piece?.type))
+                {
+                    return false;
+                }
+            }
+
+            int negativeIndex = currentField.Row - i;
+            if(negativeIndex >= 0)
+            {
+                if(!(currentPieceType == m_Fields[negativeIndex, currentField.Column].Piece?.type))
+                {
+                    return false;
+                }
+            }
+        }
+
+        Debug.Log("VERTICAL WIN");
+
+        return true;
+    }
+
+    private bool HasHorizontalWall(TileField currentField)
+    {
+        PieceType currentPieceType = IsWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
+        for(int i = 0; i < 5; i++)
+        {
+            int positiveIndex = currentField.Column + i;
+            if(positiveIndex <= 4)
+            {
+                if(!(currentPieceType == m_Fields[currentField.Row, positiveIndex].Piece?.type))
+                {
+                    return false;
+                }
+            }
+
+            int negativeIndex = currentField.Column - i;
+            if(negativeIndex >= 0)
+            {
+                if(!(currentPieceType == m_Fields[currentField.Row, negativeIndex].Piece?.type))
+                {
+                    return false;
+                }
+            }
+        }
+
+        Debug.Log("HORIZONTAL WIN");
+
+        return true;
+    }
+
+    public void EndGame (bool isWhite, VictoryType victoryType)
+    {
         CurrentState = GameState.END;
 
-        if (winner == PieceType.WHITE)
+        if (isWhite)
         {
             if (victoryType == VictoryType.TOTAL)
             {
@@ -430,26 +557,31 @@ public class Board : MonoBehaviour
 
     public void NextTurn ()
     {
-        if (m_IsWhiteTurn)
-            m_IsWhiteTurn = false;
-        else
-            m_IsWhiteTurn = true;
-            
+        m_IsWhiteTurn = !m_IsWhiteTurn;
         m_HighlightedTile = null;
 
         if (onTurnChangeCallback != null)
-            onTurnChangeCallback.Invoke ();
+            onTurnChangeCallback.Invoke (m_IsWhiteTurn);
     }
 
-    public void StartPositioningPhase ()
+    //Called by the Surrender Button
+    public void Surrender ()
+    {
+        //who surrenders is who loses
+        EndGame (!m_IsWhiteTurn, VictoryType.GREAT);
+    }
+
+    //Called by the buttons while choosing who starts
+    public void StartPositioningPhase (bool isWhite)
     {
         m_CurrentGameState = GameState.POSITIONING;
+        m_IsWhiteTurn = isWhite;
 
         if (onStateChangeCallback != null)
-            onStateChangeCallback.Invoke ();
+            onStateChangeCallback.Invoke (m_CurrentGameState);
 
         if (onTurnChangeCallback != null)
-            onTurnChangeCallback.Invoke ();
+            onTurnChangeCallback.Invoke (m_IsWhiteTurn);
     }
 
     public void StartMovementPhase ()
@@ -457,12 +589,13 @@ public class Board : MonoBehaviour
         m_CurrentGameState = GameState.MOVEMENT;
 
         if (onStateChangeCallback != null)
-            onStateChangeCallback.Invoke ();
+            onStateChangeCallback.Invoke (m_CurrentGameState);
     }
 
     //Game Methods
     private Piece GetNonPlacedBlackPiece ()
     {
+        Debug.Log("Getting Piece");
         foreach (Piece piece in m_Pieces)
         {
             if(piece.type == PieceType.BLACK && !piece.isPlaced)
@@ -477,6 +610,7 @@ public class Board : MonoBehaviour
 
     private Piece GetNonPlacedWhitePiece ()
     {
+        Debug.Log("Getting Piece");
         foreach (Piece piece in m_Pieces)
         {
             if(piece.type == PieceType.WHITE && !piece.isPlaced)
@@ -488,40 +622,11 @@ public class Board : MonoBehaviour
 
         return null;
     }
-
-    public void DehighlightAll ()
-    {
-        foreach (TileField piece in m_Fields)
-        {
-
-        }
-    }
-
-    /*
-    public void VerifyAllPieces ()
-    {
-        foreach (Piece piece in m_WhitePieces)
-        {
-            piece.VerifyAll ();
-        }
-
-        foreach (Piece piece in m_BlackPieces)
-        {
-            piece.VerifyAll ();
-        }
-    }
-
-    public void NewMovementOccured ()
-    {
-        foreach (Piece piece in m_Pieces)
-        {
-            if (piece != null)
-            {
-                //piece.turnCaptures = 0;
-                piece.movemented = false;
-                //piece.isCapturingSequence = false;
-            }
-        }
-    }
-    */
 }
+
+//Implement Coordinates
+/* public struct Coordinates
+{
+    int x;
+    int y;
+} */
