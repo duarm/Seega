@@ -328,10 +328,6 @@ public class Board : MonoBehaviour
 
     private void VerifyCapture(TileField currentField)
     {
-        //Pieces on the middle can't be captured
-        if(currentField.Row == 2 && currentField.Column == 2)
-            return;
-
         //TO IMPLEMENT: No need to check for capture in the direction the piece came from
         TryCapture(currentField);
     }
@@ -348,21 +344,26 @@ public class Board : MonoBehaviour
             //One Field above current field
             if(fieldToCheck.Piece != null)
             {
-                bool captureConditionMatch = false;
-                //Two Fields above current field
-                if(m_Fields[index + 1, currentField.Column]?.Piece?.type == currentPieceType)
+                //Piece on the middle can't be captured
+                if(fieldToCheck.Row != 2 || fieldToCheck.Column != 2)
                 {
-                    captureConditionMatch = true;
-                }
+                    bool captureConditionMatch = false;
+                    //Two Fields above current field
+                    if(m_Fields[index + 1, currentField.Column]?.Piece?.type == currentPieceType)
+                    {
+                        if(currentField.Row == 2 && currentField.Column == 2)
+                        captureConditionMatch = true;
+                    }
 
-                if(fieldToCheck.Piece.type != currentPieceType && captureConditionMatch)
-                {
-                    fieldToCheck.Capture();
+                    if(fieldToCheck.Piece.type != currentPieceType && captureConditionMatch)
+                    {
+                        fieldToCheck.Capture();
 
-                    if(currentPieceType == PieceType.WHITE)
-                        m_WhiteKillCount++;
-                    else
-                        m_BlackKillCount++;
+                        if(currentPieceType == PieceType.WHITE)
+                            m_WhiteKillCount++;
+                        else
+                            m_BlackKillCount++;
+                    }
                 }
             }
         }
@@ -374,21 +375,25 @@ public class Board : MonoBehaviour
             //One Field current field
             if(fieldToCheck.Piece != null)
             {
-                bool captureConditionMatch = false;
-                //Two Fields below current field
-                if(m_Fields[index - 1, currentField.Column]?.Piece?.type == currentPieceType)
+                //Piece on the middle can't be captured
+                if(fieldToCheck.Row != 2 || fieldToCheck.Column != 2)
                 {
-                    captureConditionMatch = true;
-                }
+                    bool captureConditionMatch = false;
+                    //Two Fields below current field
+                    if(m_Fields[index - 1, currentField.Column]?.Piece?.type == currentPieceType)
+                    {
+                        captureConditionMatch = true;
+                    }
 
-                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
-                {
-                    fieldToCheck.Capture();
+                    if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                    {
+                        fieldToCheck.Capture();
 
-                    if(currentPieceType == PieceType.WHITE)
-                        m_WhiteKillCount++;
-                    else
-                        m_BlackKillCount++;
+                        if(currentPieceType == PieceType.WHITE)
+                            m_WhiteKillCount++;
+                        else
+                            m_BlackKillCount++;
+                    }
                 }
             }
         }
@@ -400,21 +405,25 @@ public class Board : MonoBehaviour
             //One Field to right of the current field
             if(fieldToCheck.Piece != null)
             {
-                bool captureConditionMatch = false;
-                //Two Fields to right of the current field
-                if(m_Fields[currentField.Row, index + 1]?.Piece?.type == currentPieceType)
+                //Piece on the middle can't be captured
+                if(fieldToCheck.Row != 2 || fieldToCheck.Column != 2)
                 {
-                    captureConditionMatch = true;
-                }
+                    bool captureConditionMatch = false;
+                    //Two Fields to right of the current field
+                    if(m_Fields[currentField.Row, index + 1]?.Piece?.type == currentPieceType)
+                    {
+                        captureConditionMatch = true;
+                    }
 
-                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
-                {
-                    fieldToCheck.Capture();
+                    if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                    {
+                        fieldToCheck.Capture();
 
-                    if(currentPieceType == PieceType.WHITE)
-                        m_WhiteKillCount++;
-                    else
-                        m_BlackKillCount++;
+                        if(currentPieceType == PieceType.WHITE)
+                            m_WhiteKillCount++;
+                        else
+                            m_BlackKillCount++;
+                    }
                 }
             }
         }
@@ -426,21 +435,25 @@ public class Board : MonoBehaviour
             //One Field to left of the current field
             if(fieldToCheck.Piece != null)
             {
-                bool captureConditionMatch = false;
-                //Two Fields to left of the current field
-                if(m_Fields[currentField.Row, index - 1]?.Piece?.type == currentPieceType)
+                //Piece on the middle can't be captured
+                if(fieldToCheck.Row != 2 || fieldToCheck.Column != 2)
                 {
-                    captureConditionMatch = true;
-                }
+                    bool captureConditionMatch = false;
+                    //Two Fields to left of the current field
+                    if(m_Fields[currentField.Row, index - 1]?.Piece?.type == currentPieceType)
+                    {
+                        captureConditionMatch = true;
+                    }
 
-                if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
-                {
-                    fieldToCheck.Capture();
+                    if(fieldToCheck.Piece.type != currentPieceType  && captureConditionMatch)
+                    {
+                        fieldToCheck.Capture();
 
-                    if(currentPieceType == PieceType.WHITE)
-                        m_WhiteKillCount++;
-                    else
-                        m_BlackKillCount++;
+                        if(currentPieceType == PieceType.WHITE)
+                            m_WhiteKillCount++;
+                        else
+                            m_BlackKillCount++;
+                    }
                 }
             }
         }
@@ -595,7 +608,6 @@ public class Board : MonoBehaviour
     //Game Methods
     private Piece GetNonPlacedBlackPiece ()
     {
-        Debug.Log("Getting Piece");
         foreach (Piece piece in m_Pieces)
         {
             if(piece.type == PieceType.BLACK && !piece.isPlaced)
@@ -610,7 +622,6 @@ public class Board : MonoBehaviour
 
     private Piece GetNonPlacedWhitePiece ()
     {
-        Debug.Log("Getting Piece");
         foreach (Piece piece in m_Pieces)
         {
             if(piece.type == PieceType.WHITE && !piece.isPlaced)

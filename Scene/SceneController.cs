@@ -57,10 +57,11 @@ public class SceneController : MonoBehaviour
 
     public void QuitGame()
     {
-        if (ScreenFader.IsFading)
-            return;
-            
-        StartCoroutine(Quit());
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
     }
 
     public IEnumerator LoadLevel(Slider slider, GameObject text, GameObject loadBar)
@@ -84,12 +85,6 @@ public class SceneController : MonoBehaviour
 			yield return null;
 		}
 	}
-
-    IEnumerator Quit()
-    {
-        yield return StartCoroutine(ScreenFader.FadeSceneOut());
-        Application.Quit();
-    }
 
     IEnumerator Restart()
 	{
