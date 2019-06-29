@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using Seega.GlobalEnums;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -20,9 +18,9 @@ public class UIManager : MonoBehaviour
 
     private void Start ()
     {
-        Board.Instance.onTurnChangeCallback += UpdateTurnUI;
-        Board.Instance.onStateChangeCallback += UpdateStateUI;
-        Board.Instance.onGameEndCallback += ActivateEndWindow;
+        Board.Instance.OnTurnChange += UpdateTurnUI;
+        Board.Instance.OnStateChange += UpdateStateUI;
+        Board.Instance.OnGameEnd += ActivateEndWindow;
     }
 
     public void RestartButton ()
@@ -48,7 +46,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateStateUI (GameState state)
     {
-        if(!surrenderButton.activeInHierarchy)
+        if (!surrenderButton.activeInHierarchy)
             surrenderButton.SetActive (true);
 
         if (state == GameState.POSITIONING)
@@ -58,8 +56,8 @@ public class UIManager : MonoBehaviour
     }
 
     //Called by the Help Button
-    public void InvertActive(GameObject objectToInvert)
+    public void InvertActive (GameObject objectToInvert)
     {
-        objectToInvert.SetActive(!objectToInvert.activeInHierarchy);
+        objectToInvert.SetActive (!objectToInvert.activeInHierarchy);
     }
 }
