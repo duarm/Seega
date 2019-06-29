@@ -12,69 +12,68 @@ public class TileField : MonoBehaviour
     Board m_Board;
     MeshRenderer m_MeshRenderer;
 
-    public int Row { get; private set; }
-    public int Column { get; private set; }
+    public Coordinates coordinates;
     public Piece Piece { get; private set; }
 
-    private void Start() 
+    private void Start ()
     {
         m_Board = Board.Instance;
-        m_MeshRenderer = GetComponent<MeshRenderer>();
+        m_MeshRenderer = GetComponent<MeshRenderer> ();
     }
 
-    public override string ToString()
+    public override string ToString ()
     {
-        return "Row: " + Row + " Column: " + Column;
+        return "Row: " + coordinates.x + " Column: " + coordinates.y;
     }
 
-    public TileField Initialize(int row, int column, bool isWhite)
+    public TileField Initialize (int row, int column, bool isWhite)
     {
-        this.Row= row;
-        this.Column = column;
+        this.coordinates.x = row;
+        this.coordinates.y = column;
         this.isWhite = isWhite;
         return this;
     }
 
-    public void SetPiece(Piece piece)
+    public void SetPiece (Piece piece)
     {
         this.Piece = piece;
-        Piece.Teleport(this); 
+        Piece.Teleport (this);
     }
 
-    public void MoveFrom(TileField field)
+    public void MoveFrom (TileField field)
     {
         Piece = field.Piece;
-        Piece.MoveTo(this);
+        Piece.MoveTo (this);
     }
 
-    public void MovePieceTo(TileField field)
+    public void MovePieceTo (TileField field)
     {
-        field.MoveFrom(this);
+        field.MoveFrom (this);
         Piece = null;
     }
 
-    public void Capture()
+    public void Capture ()
     {
         //Play Sound
-        Piece.Capture();
+        Piece.Capture ();
         Piece = null;
     }
 
     //highlighting this tile by changing its material
-    public void Highlight()
+    public void Highlight ()
     {
         highlighting = true;
-        if(isWhite)
+        if (isWhite)
             m_MeshRenderer.material = m_Board.whiteHighlightMaterial;
         else
             m_MeshRenderer.material = m_Board.blackHighlightMaterial;
     }
 
     //dehighlighting this tile by changing its material
-    public void Dehighlight()
+    public void Dehighlight ()
     {
         highlighting = false;
-        if(isWhite)
+        if (isWhite)
             m_MeshRenderer.material = m_Board.whiteNormalMaterial;
         else
             m_MeshRenderer.material = m_Board.blackNormalMaterial;

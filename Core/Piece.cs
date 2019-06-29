@@ -1,13 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using Seega.GlobalEnums;
 using UnityEngine;
-using System.Linq;
-
-public enum PieceType
-{
-    WHITE,
-    BLACK
-}
 
 public class Piece : MonoBehaviour
 {
@@ -19,9 +11,9 @@ public class Piece : MonoBehaviour
 
     private ParticleSystem m_DeathParticle;
 
-    private void Start()
+    private void Start ()
     {
-        m_DeathParticle = GetComponentInChildren<ParticleSystem>();
+        m_DeathParticle = GetComponentInChildren<ParticleSystem> ();
     }
 
     public void Teleport (TileField tile)

@@ -23,9 +23,9 @@ namespace Kurenaiz.Utilities.Physics
 
 				if (s_Instance != null)
 					return s_Instance;
-			
+
 				Create ();
-			
+
 				return s_Instance;
 			}
 			set { s_Instance = value; }
@@ -33,7 +33,7 @@ namespace Kurenaiz.Utilities.Physics
 
 		static void Create ()
 		{
-			GameObject physicsHelperGameObject = new GameObject("PhysicsHelper");
+			GameObject physicsHelperGameObject = new GameObject ("PhysicsHelper");
 			s_Instance = physicsHelperGameObject.AddComponent<PhysicsHelper> ();
 		}
 
@@ -46,12 +46,12 @@ namespace Kurenaiz.Utilities.Physics
 				Destroy (gameObject);
 				return;
 			}
-		
+
 			PopulateColliderDictionary (m_TileFieldCache);
 		}
 
 		protected void PopulateColliderDictionary<TComponent> (Dictionary<Collider, TComponent> dict)
-			where TComponent : Component
+		where TComponent : Component
 		{
 			TComponent[] components = FindObjectsOfType<TComponent> ();
 
