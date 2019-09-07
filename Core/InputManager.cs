@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 
-namespace Seega.Assets.Scripts.Core
+namespace Seega.Scripts.Core
 {
     public class InputManager : MonoBehaviour
     {
