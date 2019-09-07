@@ -1,6 +1,7 @@
 using Seega.GlobalEnums;
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,11 +17,18 @@ public class UIManager : MonoBehaviour
     private string[] turns = new string[2] { "Branca", "Preta" };
     private string[] states = new string[2] { "Posicionamento", "Movimento" };
 
+    Board _board;
+
+    [Inject]
+    private void Construct(Board board){
+        _board = board;
+    }
+
     private void Start ()
     {
-        Board.Instance.OnTurnChange += UpdateTurnUI;
-        Board.Instance.OnStateChange += UpdateStateUI;
-        Board.Instance.OnGameEnd += ActivateEndWindow;
+        _board.OnTurnChange += UpdateTurnUI;
+        _board.OnStateChange += UpdateStateUI;
+        _board.OnGameEnd += ActivateEndWindow;
     }
 
     public void RestartButton ()
