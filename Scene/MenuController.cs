@@ -3,6 +3,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 public class MenuController : MonoBehaviour 
 {
@@ -11,6 +12,14 @@ public class MenuController : MonoBehaviour
 	public GameObject text;
 
 	bool isShowing;
+    private SceneController _sceneController;
+    private ScreenFader _screenFader;
+
+    [Inject]
+	private void Construct(SceneController sceneController, ScreenFader screenFader){
+		_sceneController = sceneController;
+		_screenFader = screenFader;
+	}
 
 	private void Start() 
 	{
@@ -22,13 +31,13 @@ public class MenuController : MonoBehaviour
 		if(Input.GetKeyDown(KeyCode.Return) && isShowing)
 		{
 			isShowing = false;
-			StartCoroutine(SceneController.Instance.LoadLevel(slider,text,loadBar));
+			StartCoroutine(_sceneController.LoadLevel(slider,text,loadBar));
 		}
 	}
 
 	IEnumerator ShowPressToStart()
 	{
-		yield return StartCoroutine(ScreenFader.FadeSceneIn());
+		yield return StartCoroutine(_screenFader.FadeSceneIn());
 		isShowing = true;
 	}
 }

@@ -6,54 +6,20 @@ using UnityEngine.UI;
 //Unity 2d game kit Screen Fader
 public class ScreenFader : MonoBehaviour
 {
-    #region Singleton
-    public static ScreenFader Instance
-    {
-        get
-        {
-            if (s_Instance != null)
-                return s_Instance;
-
-            s_Instance = FindObjectOfType<ScreenFader> ();
-
-            if (s_Instance != null)
-                return s_Instance;
-
-            Create ();
-
-            return s_Instance;
-        }
-    }
-
-    protected static ScreenFader s_Instance;
-
-    public static void Create ()
-    {
-        GameObject screenFaderGameObject = new GameObject ("SceneFader");
-        s_Instance = screenFaderGameObject.AddComponent<ScreenFader> ();
-    }
-
     void Awake ()
     {
-        if (Instance != this)
-        {
-            Destroy (gameObject);
-            return;
-        }
 
         DontDestroyOnLoad (gameObject);
     }
-
-    #endregion
 
     public enum FadeType
     {
         Black
     }
 
-    public static bool IsFading
+    public bool IsFading
     {
-        get { return Instance.m_IsFading; }
+        get { return m_IsFading; }
     }
 
     public CanvasGroup faderCanvasGroup;
@@ -78,9 +44,9 @@ public class ScreenFader : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
     }
 
-    public static void SetAlpha (float alpha)
+    public void SetAlpha (float alpha)
     {
-        Instance.faderCanvasGroup.alpha = alpha;
+        faderCanvasGroup.alpha = alpha;
     }
 
     /// <summary>
@@ -89,13 +55,13 @@ public class ScreenFader : MonoBehaviour
     /// </summary>
     /// <param name="finalAlpha">The final value of alpha. default 0.</param>
     /// <param name="fadeDuration">The duration of the fade. default .5f.</param>
-    public static IEnumerator FadeSceneIn (float finalAlpha = 0f, float fadeDuration = .5f)
+    public IEnumerator FadeSceneIn (float finalAlpha = 0f, float fadeDuration = .5f)
     {
         CanvasGroup canvasGroup;
-        canvasGroup = Instance.faderCanvasGroup;
+        canvasGroup = faderCanvasGroup;
 
         Debug.Log ("Fading in");
-        yield return Instance.StartCoroutine (Instance.Fade (finalAlpha, canvasGroup, fadeDuration));
+        yield return StartCoroutine (Fade (finalAlpha, canvasGroup, fadeDuration));
 
         if (finalAlpha == 0)
             canvasGroup.gameObject.SetActive (false);
@@ -108,13 +74,13 @@ public class ScreenFader : MonoBehaviour
     /// <param name="finalAlpha">The final value of alpha. default 1.</param>
     /// <param name="fadeDuration">The duration of the fade. default .5f.</param>
     /// <param name="fadeType">The type of the fade. default FadeType.Black</param>
-    public static IEnumerator FadeSceneOut (float finalAlpha = 1f, float fadeDuration = .5f, FadeType fadeType = FadeType.Black)
+    public IEnumerator FadeSceneOut (float finalAlpha = 1f, float fadeDuration = .5f, FadeType fadeType = FadeType.Black)
     {
         CanvasGroup canvasGroup;
-        canvasGroup = Instance.faderCanvasGroup;
+        canvasGroup = faderCanvasGroup;
 
         canvasGroup.gameObject.SetActive (true);
 
-        yield return Instance.StartCoroutine (Instance.Fade (finalAlpha, canvasGroup, fadeDuration));
+        yield return StartCoroutine (Fade (finalAlpha, canvasGroup, fadeDuration));
     }
 }

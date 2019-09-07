@@ -1,4 +1,5 @@
 using System;
+using Kurenaiz.Utilities.Events;
 using Kurenaiz.Utilities.Physics;
 using Kurenaiz.Utilities.Types;
 using Seega.GlobalEnums;
@@ -10,9 +11,6 @@ namespace Seega.Scripts.Core
 {
     public class Board : MonoBehaviour
     {
-        public Transform tileFieldParent;
-
-        bool m_IsUpdating;
         int m_TurnIndex;
         bool _isWhiteTurn;
         int m_PieceIndex;
@@ -21,87 +19,75 @@ namespace Seega.Scripts.Core
 
         TileField m_HighlightedTile; //Keep track of the current selected piece
         GameState _currentGameState = GameState.STARTING;
-        Safe2DArray m_Fields = new Safe2DArray(5, 5);
-        Piece[] m_Pieces;
-
-
-        public Action<GameState> OnStateChange;
-        public Action<bool> OnTurnChange;
-        public Action<string, string> OnGameEnd;
+        Safe2DArray _fields;
+        Piece[] _pieces;
 
         public IRayProvider _rayProvider;
         public ISelector _selector;
+        public IFieldProvider _fieldProvider;
+        public IPieceProvider _pieceProvider;
+        public ICaptureVerifier _captureVerifier;
 
         private PhysicsCache _physicsCache;
+        private EventManager _eventManager;
 
         [Inject]
-        private void Construct(PhysicsCache physicsCache)
+        private void Construct (PhysicsCache physicsCache, EventManager eventManager)
         {
             _physicsCache = physicsCache;
+            _eventManager = eventManager;
         }
 
-        void Awake() => SolveDependencies();
+        void Awake () => SolveDependencies ();
 
-        void Start() => PopulateArrays();
+        void Start () => PopulateArrays ();
 
-        private void SolveDependencies()
+        private void SolveDependencies ()
         {
-            _rayProvider = GetComponent<IRayProvider>();
-            _selector = GetComponent<ISelector>();
+            _rayProvider = GetComponent<IRayProvider> ();
+            _selector = GetComponent<ISelector> ();
+            _fieldProvider = GetComponent<IFieldProvider> ();
+            _pieceProvider = GetComponent<IPieceProvider> ();
+            _captureVerifier = GetComponent<ICaptureVerifier>();
         }
 
-        private void PopulateArrays()
+        private void PopulateArrays ()
         {
-            var row = 0;
-            var column = 0;
-            var isWhite = true;
-            foreach (Transform field in tileFieldParent)
-            {
-                if (row == 5)
-                {
-                    column++;
-                    row = 0;
-                }
-
-                m_Fields[row, column] = field.GetComponent<TileField>().Initialize(row, column, isWhite);
-                isWhite = !isWhite;
-                row++;
-            }
-
-            m_Pieces = FindObjectsOfType<Piece>();
+            _fields = _fieldProvider.CreateField ();
+            _pieces = _pieceProvider.CreatePieces ();
         }
 
-        public void OnMouseClick()
+        public void OnMouseClick ()
         {
             //CREATING THE RAY
-            var ray = _rayProvider.CreateRay();
+            var ray = _rayProvider.CreateRay ();
 
             //SHOTING THE RAY
             //shooting a raycast to get the tile that the player clicked
-            if (_selector.Check(ray))
+            if (_selector.Check (ray))
             {
                 TileField tile;
-                _physicsCache.TryGetTileField(_selector.GetSelection(), out tile);
+                _physicsCache.TryGetTileField (_selector.GetSelection (), out tile);
                 if (_currentGameState == GameState.MOVEMENT)
                 {
                     //Two possibilities: the field can or not have a piece
                     if (tile.Piece != null)
                     {
                         // One possibility: If its a piece from the current turn, we try to highlight
-                        if (ValidateHighlight(tile.Piece))
+                        if (ValidateHighlight (tile.Piece))
                         {
                             // Three possibilities: 
                             // If the clicked tile is the current highlighted, we only dehighlight
                             // If the highlighted tile is null, we only highlight
                             // If the clicked tile isn't the current highlighted, we dehighlight and highlight the clicked one
                             if (tile == m_HighlightedTile)
-                                Deselect();
+                                Deselect ();
                             else if (m_HighlightedTile == null)
-                                TrySelectEmptyAdjacents(tile);
+                                TrySelectEmptyAdjacents (tile);
                             else if (tile != m_HighlightedTile)
                             {
-                                Deselect();
-                                TrySelectEmptyAdjacents(tile);
+                                Deselect ();
+                                TrySelectEmptyAdjacents (tile);
                             }
                         }
                     }
@@ -114,10 +100,10 @@ namespace Seega.Scripts.Core
                             if (tile.IsHighlighting)
                             {
                                 //If this tile is highlighted, we can move to this tile.
-                                m_HighlightedTile.MovePieceTo(tile);
-                                UpdateBoard(tile, m_HighlightedTile);
-                                Deselect();
-                                NextTurn();
+                                m_HighlightedTile.MovePieceTo (tile);
+                                UpdateBoard (tile, m_HighlightedTile);
+                                Deselect ();
+                                NextTurn ();
                             }
                         }
                     }
@@ -132,9 +118,9 @@ namespace Seega.Scripts.Core
                             return;
 
                         if (_isWhiteTurn)
-                            tile.SetPiece(GetNonPlacedWhitePiece());
+                            tile.SetPiece (GetNonPlacedWhitePiece ());
                         else
-                            tile.SetPiece(GetNonPlacedBlackPiece());
+                            tile.SetPiece (GetNonPlacedBlackPiece ());
 
                         m_TurnIndex++;
 
@@ -142,72 +128,72 @@ namespace Seega.Scripts.Core
                         if (m_TurnIndex == 2)
                         {
                             m_TurnIndex = 0;
-                            NextTurn();
+                            NextTurn ();
                         }
 
                         //24 is the number of pieces
                         if (m_PieceIndex == 24)
-                            StartMovementPhase();
+                            StartMovementPhase ();
                     }
                 }
             }
         }
 
-        private void Deselect()
+        private void Deselect ()
         {
             TileField field;
-            var coor = new Coordinates(m_HighlightedTile);
+            var coor = new Coordinates (m_HighlightedTile);
 
-            field = m_Fields[coor.up];
+            field = _fields[coor.up];
             if (field?.IsHighlighting == true)
-                field.OnDeselect();
+                field.OnDeselect ();
 
-            field = m_Fields[coor.right];
+            field = _fields[coor.right];
             if (field?.IsHighlighting == true)
-                field.OnDeselect();
+                field.OnDeselect ();
 
-            field = m_Fields[coor.down];
+            field = _fields[coor.down];
             if (field?.IsHighlighting == true)
-                field.OnDeselect();
+                field.OnDeselect ();
 
-            field = m_Fields[coor.left];
+            field = _fields[coor.left];
             if (field?.IsHighlighting == true)
-                field.OnDeselect();
+                field.OnDeselect ();
 
             m_HighlightedTile = null;
         }
 
-        private void TrySelectEmptyAdjacents(TileField tile)
+        private void TrySelectEmptyAdjacents (TileField tile)
         {
             TileField field;
-            var coor = new Coordinates(tile);
+            var coor = new Coordinates (tile);
             var highlighted = false;
 
-            field = m_Fields[coor.up];
-            if (TrySelect(field))
+            field = _fields[coor.up];
+            if (TrySelect (field))
                 highlighted = true;
 
-            field = m_Fields[coor.right];
-            if (TrySelect(field))
+            field = _fields[coor.right];
+            if (TrySelect (field))
                 highlighted = true;
 
-            field = m_Fields[coor.down];
-            if (TrySelect(field))
+            field = _fields[coor.down];
+            if (TrySelect (field))
                 highlighted = true;
 
-            field = m_Fields[coor.left];
-            if (TrySelect(field))
+            field = _fields[coor.left];
+            if (TrySelect (field))
                 highlighted = true;
 
             if (highlighted)
                 m_HighlightedTile = tile;
         }
 
-        private bool TrySelect(TileField tile)
+        private bool TrySelect (TileField tile)
         {
             if (tile != null && tile.Piece == null)
             {
-                tile.OnSelect();
+                tile.OnSelect ();
                 return true;
             }
             return false;
@@ -216,7 +202,7 @@ namespace Seega.Scripts.Core
         /// <summary>
         /// Check if the clicked piece corresponds to this turn
         /// </summary>
-        public bool ValidateHighlight(Piece piece)
+        public bool ValidateHighlight (Piece piece)
         {
             if (piece.type == PieceType.WHITE)
             {
@@ -232,91 +218,45 @@ namespace Seega.Scripts.Core
             return false;
         }
 
-        public void UpdateBoard(TileField currentField, TileField lastField)
+        public void UpdateBoard (TileField currentField, TileField lastField)
         {
             bool movedVertically = currentField.Coordinates.x > lastField.Coordinates.x || currentField.Coordinates.x < lastField.Coordinates.x;
 
-            VerifyWall(currentField, movedVertically);
-            VerifyCapture(currentField);
-            VerifyKills();
+            VerifyWall (currentField, movedVertically);
+            VerifyCapture (currentField);
+            VerifyKills ();
         }
 
-        private void VerifyKills()
+        private void VerifyKills ()
         {
             if (m_WhiteKillCount == 12)
-                EndGame(true, VictoryType.TOTAL);
+                EndGame (true, VictoryType.TOTAL);
             else if (m_BlackKillCount == 12)
-                EndGame(false, VictoryType.TOTAL);
+                EndGame (false, VictoryType.TOTAL);
         }
 
-        private void VerifyCapture(TileField currentField)
+        private void VerifyCapture (TileField currentField)
         {
             var currentPieceType = _isWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
-            var coordinates = new Coordinates(currentField);
-            CheckForCaptureOnSide(currentField, currentPieceType, coordinates.up, coordinates.right, coordinates.down, coordinates.left);
+            _captureVerifier.VerifyCapture(currentField, currentPieceType, _fields);
         }
 
-        private void CheckForCaptureOnSide(TileField currentTile, PieceType pieceType, params Coordinates[] coords)
-        {
-            for (int i = 0; i < coords.Length; i++)
-            {
-                //Verifying the piece adjacent to the currentField
-                //[farTile][inBetweenTile][currentTile]
-                var farCoordinates = coords[i];
-                var inBetweenTile = m_Fields[coords[i]];
-
-                if (currentTile.Coordinates.x > coords[i].x)
-                    farCoordinates.x--;
-                else if (currentTile.Coordinates.x < coords[i].x)
-                    farCoordinates.x++;
-                else if (currentTile.Coordinates.y < coords[i].y)
-                    farCoordinates.y++;
-                else if (currentTile.Coordinates.y > coords[i].y)
-                    farCoordinates.y--;
-
-                var farTile = m_Fields[farCoordinates];
-
-                //Verifying the adjacent tile is an enemy
-                if (inBetweenTile != null &&
-                    inBetweenTile.Piece != null &&
-                    inBetweenTile.Piece.type != pieceType)
-                {
-                    //Veryfying if the far tile is an ally
-                    if (farTile != null &&
-                        farTile.Piece != null &&
-                        farTile.Piece.type == pieceType)
-                    {
-                        //if the inBetweenPiece is on the middle, it can't be captured
-                        if (inBetweenTile.Coordinates.x != 2 ||
-                            inBetweenTile.Coordinates.y != 2)
-                        {
-                            inBetweenTile.Capture();
-                            if (pieceType == PieceType.WHITE)
-                                m_WhiteKillCount++;
-                            else
-                                m_BlackKillCount++;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void VerifyWall(TileField currentField, bool movedVertically)
+        private void VerifyWall (TileField currentField, bool movedVertically)
         {
             //If the piece moved vertically, no need to check for a vertical wall
             if (movedVertically)
             {
-                if (HasHorizontalWall(currentField))
-                    EndGame(_isWhiteTurn, VictoryType.MINOR);
+                if (HasHorizontalWall (currentField))
+                    EndGame (_isWhiteTurn, VictoryType.MINOR);
             }
             else
             {
-                if (HasVerticalWall(currentField))
-                    EndGame(_isWhiteTurn, VictoryType.MINOR);
+                if (HasVerticalWall (currentField))
+                    EndGame (_isWhiteTurn, VictoryType.MINOR);
             }
         }
 
-        private bool HasVerticalWall(TileField currentField)
+        private bool HasVerticalWall (TileField currentField)
         {
             var currentPieceType = _isWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
             for (int i = 0; i < 5; i++)
@@ -324,7 +264,7 @@ namespace Seega.Scripts.Core
                 int positiveIndex = currentField.Coordinates.x + i;
                 if (positiveIndex <= 4)
                 {
-                    if (!(currentPieceType == m_Fields[positiveIndex, currentField.Coordinates.y].Piece?.type))
+                    if (!(currentPieceType == _fields[positiveIndex, currentField.Coordinates.y].Piece?.type))
                     {
                         return false;
                     }
@@ -333,7 +273,7 @@ namespace Seega.Scripts.Core
                 int negativeIndex = currentField.Coordinates.x - i;
                 if (negativeIndex >= 0)
                 {
-                    if (!(currentPieceType == m_Fields[negativeIndex, currentField.Coordinates.y].Piece?.type))
+                    if (!(currentPieceType == _fields[negativeIndex, currentField.Coordinates.y].Piece?.type))
                     {
                         return false;
                     }
@@ -343,7 +283,7 @@ namespace Seega.Scripts.Core
             return true;
         }
 
-        private bool HasHorizontalWall(TileField currentField)
+        private bool HasHorizontalWall (TileField currentField)
         {
             var currentPieceType = _isWhiteTurn ? PieceType.WHITE : PieceType.BLACK;
             for (int i = 0; i < 5; i++)
@@ -351,7 +291,7 @@ namespace Seega.Scripts.Core
                 int positiveIndex = currentField.Coordinates.y + i;
                 if (positiveIndex <= 4)
                 {
-                    if (!(currentPieceType == m_Fields[currentField.Coordinates.x, positiveIndex].Piece?.type))
+                    if (!(currentPieceType == _fields[currentField.Coordinates.x, positiveIndex].Piece?.type))
                     {
                         return false;
                     }
@@ -360,7 +300,7 @@ namespace Seega.Scripts.Core
                 int negativeIndex = currentField.Coordinates.y - i;
                 if (negativeIndex >= 0)
                 {
-                    if (!(currentPieceType == m_Fields[currentField.Coordinates.x, negativeIndex].Piece?.type))
+                    if (!(currentPieceType == _fields[currentField.Coordinates.x, negativeIndex].Piece?.type))
                     {
                         return false;
                     }
@@ -370,7 +310,7 @@ namespace Seega.Scripts.Core
             return true;
         }
 
-        public void EndGame(bool isWhite, VictoryType victoryType)
+        public void EndGame (bool isWhite, VictoryType victoryType)
         {
             _currentGameState = GameState.END;
 
@@ -378,75 +318,75 @@ namespace Seega.Scripts.Core
             {
                 if (victoryType == VictoryType.TOTAL)
                 {
-                    OnGameEnd("Brancas", "Total");
+                    _eventManager.OnGameEnd ("Brancas", "Total");
                 }
                 else if (victoryType == VictoryType.GREAT)
                 {
-                    OnGameEnd("Brancas", "Grande");
+                    _eventManager.OnGameEnd ("Brancas", "Grande");
                 }
                 else if (victoryType == VictoryType.MINOR)
                 {
-                    OnGameEnd("Brancas", "Pequena");
+                    _eventManager.OnGameEnd ("Brancas", "Pequena");
                 }
             }
             else
             {
                 if (victoryType == VictoryType.TOTAL)
                 {
-                    OnGameEnd("Pretas", "Total");
+                    _eventManager.OnGameEnd ("Pretas", "Total");
                 }
                 else if (victoryType == VictoryType.GREAT)
                 {
-                    OnGameEnd("Pretas", "Grande");
+                    _eventManager.OnGameEnd ("Pretas", "Grande");
                 }
                 else if (victoryType == VictoryType.MINOR)
                 {
-                    OnGameEnd("Pretas", "Pequena");
+                    _eventManager.OnGameEnd ("Pretas", "Pequena");
                 }
             }
         }
 
-        public void NextTurn()
+        public void NextTurn ()
         {
             _isWhiteTurn = !_isWhiteTurn;
             m_HighlightedTile = null;
 
-            if (OnTurnChange != null)
-                OnTurnChange(_isWhiteTurn);
+            if (_eventManager.OnTurnChange != null)
+                _eventManager.OnTurnChange (_isWhiteTurn);
         }
 
         //Called by the Surrender Button
-        public void Surrender()
+        public void Surrender ()
         {
             //who surrenders is who loses
-            EndGame(!_isWhiteTurn, VictoryType.GREAT);
+            EndGame (!_isWhiteTurn, VictoryType.GREAT);
         }
 
         //Called by the buttons while choosing who starts
-        public void StartPositioningPhase(bool isWhite)
+        public void StartPositioningPhase (bool isWhite)
         {
             _currentGameState = GameState.POSITIONING;
             _isWhiteTurn = isWhite;
 
-            if (OnStateChange != null)
-                OnStateChange(_currentGameState);
+            if (_eventManager.OnStateChange != null)
+                _eventManager.OnStateChange (_currentGameState);
 
-            if (OnStateChange != null)
-                OnTurnChange(_isWhiteTurn);
+            if (_eventManager.OnStateChange != null)
+                _eventManager.OnTurnChange (_isWhiteTurn);
         }
 
-        public void StartMovementPhase()
+        public void StartMovementPhase ()
         {
             _currentGameState = GameState.MOVEMENT;
 
-            if (OnStateChange != null)
-                OnStateChange(_currentGameState);
+            if (_eventManager.OnStateChange != null)
+                _eventManager.OnStateChange (_currentGameState);
         }
 
         //Game Methods
-        private Piece GetNonPlacedBlackPiece()
+        private Piece GetNonPlacedBlackPiece ()
         {
-            foreach (Piece piece in m_Pieces)
+            foreach (Piece piece in _pieces)
             {
                 if (piece.type == PieceType.BLACK && !piece.isPlaced)
                 {
@@ -458,9 +398,9 @@ namespace Seega.Scripts.Core
             return null;
         }
 
-        private Piece GetNonPlacedWhitePiece()
+        private Piece GetNonPlacedWhitePiece ()
         {
-            foreach (Piece piece in m_Pieces)
+            foreach (Piece piece in _pieces)
             {
                 if (piece.type == PieceType.WHITE && !piece.isPlaced)
                 {

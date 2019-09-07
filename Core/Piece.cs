@@ -6,34 +6,35 @@ namespace Seega.Scripts.Core
     public class Piece : MonoBehaviour
     {
         public PieceType type;
+        public float yOffset = .5f;
+
         [HideInInspector]
         public bool isPlaced;
         //public bool isCapturingSequence;
         //public int turnCaptures;
 
-        private ParticleSystem m_DeathParticle;
+        ICapturer _capturer;
 
         private void Start ()
         {
-            m_DeathParticle = GetComponentInChildren<ParticleSystem> ();
+            _capturer = GetComponent<ICapturer>();
         }
 
         public void Teleport (TileField tile)
         {
-            transform.position = new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z);
+            transform.position = new Vector3 (tile.transform.position.x, tile.transform.position.y + yOffset, tile.transform.position.z);
             isPlaced = true;
         }
 
         public void MoveTo (TileField tile)
         {
-            iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z), .3f);
+            iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, tile.transform.position.y + yOffset, tile.transform.position.z), .3f);
             isPlaced = true;
         }
 
         public void Capture ()
         {
-            m_DeathParticle.Play ();
-            Destroy (this.gameObject, .5f);
+            _capturer.Capture();
         }
     }
 }

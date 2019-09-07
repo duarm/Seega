@@ -1,3 +1,4 @@
+using Kurenaiz.Utilities.Events;
 using Kurenaiz.Utilities.Physics;
 using Seega.Scripts.Core;
 using Seega.Scripts.UI;
@@ -9,6 +10,9 @@ public class GameInstaller : MonoInstaller
     [SerializeField] Board _board;
     [SerializeField] UIManager _uiManager;
     [SerializeField] PhysicsCache _physicsCache;
+    [SerializeField] ScreenFader _screenFader;
+    [SerializeField] SceneController _sceneController;
+    [SerializeField] EventManager _eventManager;
 
     private void OnValidate() {
         if (_board == null)
@@ -19,6 +23,15 @@ public class GameInstaller : MonoInstaller
         
         if(_physicsCache == null)
             _physicsCache = FindObjectOfType<PhysicsCache>();
+        
+        if(_screenFader == null)
+            _screenFader = FindObjectOfType<ScreenFader>();
+
+        if(_sceneController == null)
+            _sceneController = FindObjectOfType<SceneController>();
+        
+        if(_eventManager == null)
+            _eventManager = FindObjectOfType<EventManager>();
     }
 
     public override void InstallBindings()
@@ -35,5 +48,16 @@ public class GameInstaller : MonoInstaller
             .FromInstance(_uiManager)
             .AsSingle();
 
+        Container.Bind<ScreenFader>()
+            .FromInstance(_screenFader)
+            .AsSingle();
+
+        Container.Bind<SceneController>()
+            .FromInstance(_sceneController)
+            .AsSingle();
+
+        Container.Bind<EventManager>()
+            .FromInstance(_eventManager)
+            .AsSingle();
     }
 }

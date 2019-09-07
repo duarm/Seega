@@ -1,3 +1,5 @@
+using System;
+using Kurenaiz.Utilities.Events;
 using Seega.GlobalEnums;
 using Seega.Scripts.Core;
 using TMPro;
@@ -21,22 +23,29 @@ namespace Seega.Scripts.UI
         private string[] states = new string[2] { "Posicionamento", "Movimento" };
 
         Board _board;
+        private SceneController _sceneController;
+        private EventManager _eventManager;
 
         [Inject]
-        private void Construct(Board board){
+        private void Construct(Board board, 
+            SceneController sceneController,
+            EventManager eventManager)
+        {
             _board = board;
+            _sceneController = sceneController;
+            _eventManager = eventManager;
         }
 
         private void Start ()
         {
-            _board.OnTurnChange += UpdateTurnUI;
-            _board.OnStateChange += UpdateStateUI;
-            _board.OnGameEnd += ActivateEndWindow;
+            _eventManager.OnTurnChange += UpdateTurnUI;
+            _eventManager.OnStateChange += UpdateStateUI;
+            _eventManager.OnGameEnd += ActivateEndWindow;
         }
 
         public void RestartButton ()
         {
-            SceneController.Instance.RestartScene ();
+            _sceneController.RestartScene ();
         }
 
         public void ActivateEndWindow (string winner, string winType)
