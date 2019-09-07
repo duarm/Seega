@@ -1,6 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Seega.Scripts.Core;
+using Seega.Scripts.Types;
 
 namespace Kurenaiz.Utilities.Types
 {

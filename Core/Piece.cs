@@ -1,36 +1,39 @@
 using Seega.GlobalEnums;
 using UnityEngine;
 
-public class Piece : MonoBehaviour
+namespace Seega.Scripts.Core
 {
-    public PieceType type;
-    [HideInInspector]
-    public bool isPlaced;
-    //public bool isCapturingSequence;
-    //public int turnCaptures;
-
-    private ParticleSystem m_DeathParticle;
-
-    private void Start ()
+    public class Piece : MonoBehaviour
     {
-        m_DeathParticle = GetComponentInChildren<ParticleSystem> ();
-    }
+        public PieceType type;
+        [HideInInspector]
+        public bool isPlaced;
+        //public bool isCapturingSequence;
+        //public int turnCaptures;
 
-    public void Teleport (TileField tile)
-    {
-        transform.position = new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z);
-        isPlaced = true;
-    }
+        private ParticleSystem m_DeathParticle;
 
-    public void MoveTo (TileField tile)
-    {
-        iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z), .3f);
-        isPlaced = true;
-    }
+        private void Start ()
+        {
+            m_DeathParticle = GetComponentInChildren<ParticleSystem> ();
+        }
 
-    public void Capture ()
-    {
-        m_DeathParticle.Play ();
-        Destroy (this.gameObject, .5f);
+        public void Teleport (TileField tile)
+        {
+            transform.position = new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z);
+            isPlaced = true;
+        }
+
+        public void MoveTo (TileField tile)
+        {
+            iTween.MoveTo (this.gameObject, new Vector3 (tile.transform.position.x, .5f, tile.transform.position.z), .3f);
+            isPlaced = true;
+        }
+
+        public void Capture ()
+        {
+            m_DeathParticle.Play ();
+            Destroy (this.gameObject, .5f);
+        }
     }
 }

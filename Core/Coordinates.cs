@@ -1,63 +1,67 @@
-public struct Coordinates
+using Seega.Scripts.Core;
+
+namespace Seega.Scripts.Types 
 {
-
-    public int x;
-    public int y;
-
-    public Coordinates up
+    public struct Coordinates
     {
-        get
+        public int x;
+        public int y;
+
+        public Coordinates up
         {
-            return new Coordinates (x + 1, y);
+            get
+            {
+                return new Coordinates (x + 1, y);
+            }
         }
-    }
 
-    public Coordinates right
-    {
-        get
+        public Coordinates right
         {
-            return new Coordinates (x, y + 1);
+            get
+            {
+                return new Coordinates (x, y + 1);
+            }
         }
-    }
 
-    public Coordinates down
-    {
-        get
+        public Coordinates down
         {
-            return new Coordinates (x - 1, y);
+            get
+            {
+                return new Coordinates (x - 1, y);
+            }
         }
-    }
 
-    public Coordinates left
-    {
-        get
+        public Coordinates left
         {
-            return new Coordinates (x, y - 1);
+            get
+            {
+                return new Coordinates (x, y - 1);
+            }
         }
-    }
 
-    public static Coordinates zero
-    {
-        get
+        public static Coordinates zero
         {
-            return new Coordinates (0, 0);
+            get
+            {
+                return new Coordinates (0, 0);
+            }
         }
-    }
 
-    public Coordinates (int x, int y)
-    {
-        this.x = x;
-        this.y = y;
-    }
+        public Coordinates (int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
 
-    public Coordinates (TileField tile)
-    {
-        this.x = tile.Coordinates.x;
-        this.y = tile.Coordinates.y;
-    }
+        public Coordinates (TileField tile)
+        {
+            this.x = tile.Coordinates.x;
+            this.y = tile.Coordinates.y;
+        }
 
-    public override string ToString()
-    {
-        return $"({x}, {y})";
+        public override string ToString()
+        {
+            return $"({x}, {y})";
+        }
     }
 }

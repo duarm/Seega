@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Seega.Scripts.Core;
 using UnityEngine;
 
 namespace Kurenaiz.Utilities.Physics
