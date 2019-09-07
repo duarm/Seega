@@ -52,8 +52,8 @@ public struct Coordinates
 
     public Coordinates (TileField tile)
     {
-        this.x = tile.coordinates.x;
-        this.y = tile.coordinates.y;
+        this.x = tile.Coordinates.x;
+        this.y = tile.Coordinates.y;
     }
 
     public override string ToString()
