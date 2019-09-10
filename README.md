@@ -5,15 +5,21 @@ The objective of this project was to expose the african culture through its game
 
 ### Features
 Seega Game [X]
+
 AI [ ]
+
 Online/Local [ ]
+
 Other Game Modes [ ]
 
 ### Technical Features
 
 -Event Manager [X]
+
 -Dependecy Injection (Zenject) [X]
+
 -Game Object Caching [X]
+
 -Pooling [ ]
 
 ![Game Image](~Git/seega_display_image.PNG)
