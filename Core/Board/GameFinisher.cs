@@ -8,7 +8,8 @@ public class GameFinisher : MonoBehaviour, IGameFinisher
     private EventManager _eventManager;
 
     [Inject]
-    private void Construct(EventManager eventManager){
+    private void Construct (EventManager eventManager)
+    {
         _eventManager = eventManager;
     }
 

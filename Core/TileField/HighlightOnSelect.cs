@@ -3,7 +3,7 @@ using UnityEngine;
 public class HighlightOnSelect : MonoBehaviour, ISelectable
 {
     [SerializeField] bool isWhite = true;
-    
+
     private MeshRenderer _meshRenderer;
     private bool _isSelected { get; set; }
 
@@ -12,7 +12,7 @@ public class HighlightOnSelect : MonoBehaviour, ISelectable
     [SerializeField] Material whiteHighlightMaterial;
     [SerializeField] Material blackNormalMaterial;
     [SerializeField] Material whiteNormalMaterial;
-    
+
     private void Start () => _meshRenderer = GetComponent<MeshRenderer> ();
 
     public void OnDeselect ()
@@ -33,5 +33,5 @@ public class HighlightOnSelect : MonoBehaviour, ISelectable
             _meshRenderer.material = blackHighlightMaterial;
     }
 
-    bool ISelectable.IsSelected() => _isSelected;
+    bool ISelectable.IsSelected () => _isSelected;
 }

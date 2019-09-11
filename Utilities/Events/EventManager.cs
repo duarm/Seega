@@ -1,13 +1,14 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Seega.Enums;
+using UnityEngine;
 
 namespace Kurenaiz.Utilities.Events
 {
-    public class EventManager : MonoBehaviour, IEventManager {
+    public class EventManager : MonoBehaviour, IEventManager
+    {
 
-        private Dictionary <string, Action> eventDictionary;
+        private Dictionary<string, Action> eventDictionary;
 
         public Action<Phase> OnStateChange;
         public Action<bool> OnTurnChange;
@@ -17,7 +18,7 @@ namespace Kurenaiz.Utilities.Events
         {
             if (eventDictionary == null)
             {
-                eventDictionary = new Dictionary<string, Action>();
+                eventDictionary = new Dictionary<string, Action> ();
             }
         }
 
@@ -28,11 +29,11 @@ namespace Kurenaiz.Utilities.Events
             {
                 thisEvent += listener;
                 eventDictionary[eventName] = thisEvent;
-            } 
+            }
             else
             {
                 thisEvent += listener;
-                eventDictionary.Add(eventName, thisEvent);
+                eventDictionary.Add (eventName, thisEvent);
             }
         }
 

@@ -15,7 +15,7 @@ public class Piece : MonoBehaviour
 
     private void Start ()
     {
-        _capturer = GetComponent<ICapturer>();
+        _capturer = GetComponent<ICapturer> ();
     }
 
     public void Teleport (TileField tile)
@@ -32,6 +32,6 @@ public class Piece : MonoBehaviour
 
     public void Capture ()
     {
-        _capturer.Capture();
+        _capturer.Capture ();
     }
 }

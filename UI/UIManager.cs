@@ -25,7 +25,7 @@ namespace Seega.UI
         private EventManager _eventManager;
 
         [Inject]
-        private void Construct(Board board, 
+        private void Construct (Board board,
             SceneController sceneController,
             EventManager eventManager)
         {

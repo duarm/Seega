@@ -2,5 +2,5 @@ using Kurenaiz.Utilities.Types;
 
 public interface IFieldProvider
 {
-    Safe2DArray GetField();
+    Safe2DArray GetField ();
 }

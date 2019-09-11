@@ -1,7 +1,6 @@
-
 public interface ISelectable
 {
-    void OnSelect();
-    void OnDeselect();
-    bool IsSelected();
+    void OnSelect ();
+    void OnDeselect ();
+    bool IsSelected ();
 }

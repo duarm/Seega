@@ -7,21 +7,21 @@ public class TurnManager : MonoBehaviour, ITurnManager
 {
     int _turnIndex;
     bool _isWhiteTurn;
-    
+
     private EventManager _eventManager;
 
     [Inject]
-    private void Construct(EventManager eventManager)
+    private void Construct (EventManager eventManager)
     {
         _eventManager = eventManager;
     }
 
-    public bool IsWhiteTurn()
+    public bool IsWhiteTurn ()
     {
         return _isWhiteTurn;
     }
 
-    public void NextTurn()
+    public void NextTurn ()
     {
         _turnIndex++;
         _isWhiteTurn = !_isWhiteTurn;
@@ -29,12 +29,12 @@ public class TurnManager : MonoBehaviour, ITurnManager
             _eventManager.OnTurnChange (_isWhiteTurn);
     }
 
-    public ColorType GetCurrentTurn()
+    public ColorType GetCurrentTurn ()
     {
         return _isWhiteTurn ? ColorType.WHITE : ColorType.BLACK;
     }
 
-    public void Start(ColorType starter)
+    public void Initialize (ColorType starter)
     {
         _isWhiteTurn = starter == ColorType.BLACK ? false : true;
     }

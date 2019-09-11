@@ -6,9 +6,9 @@ public class PieceProviderWithFindObjectsOfType : MonoBehaviour, IPieceProvider
 {
     private IEnumerable<Piece> _pieces;
 
-    void Start()
+    void Start ()
     {
-        _pieces = FindObjectsOfType<Piece>();
+        _pieces = FindObjectsOfType<Piece> ();
     }
 
     public Piece GetNonPlacedBlackPiece ()
@@ -28,7 +28,7 @@ public class PieceProviderWithFindObjectsOfType : MonoBehaviour, IPieceProvider
     {
         foreach (Piece piece in _pieces)
         {
-            if (piece.type ==  ColorType.WHITE && !piece.isPlaced)
+            if (piece.type == ColorType.WHITE && !piece.isPlaced)
             {
                 return piece;
             }

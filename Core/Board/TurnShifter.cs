@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class TurnShifter : MonoBehaviour, ITurnShifter
 {
-    public void NextTurn()
+    public void NextTurn ()
     {
-        throw new System.NotImplementedException();
+        throw new System.NotImplementedException ();
     }
 }

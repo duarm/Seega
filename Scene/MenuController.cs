@@ -3,39 +3,40 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class MenuController : MonoBehaviour 
+public class MenuController : MonoBehaviour
 {
 	public Slider slider;
 	public GameObject loadBar;
 	public GameObject text;
 
 	bool isShowing;
-    private SceneController _sceneController;
-    private ScreenFader _screenFader;
+	private SceneController _sceneController;
+	private ScreenFader _screenFader;
 
-    [Inject]
-	private void Construct(SceneController sceneController, ScreenFader screenFader){
+	[Inject]
+	private void Construct (SceneController sceneController, ScreenFader screenFader)
+	{
 		_sceneController = sceneController;
 		_screenFader = screenFader;
 	}
 
-	private void Start() 
+	private void Start ()
 	{
-		StartCoroutine(ShowPressToStart());
+		StartCoroutine (ShowPressToStart ());
 	}
 
-	private void Update() 
+	private void Update ()
 	{
-		if(Input.GetKeyDown(KeyCode.Return) && isShowing)
+		if (Input.GetKeyDown (KeyCode.Return) && isShowing)
 		{
 			isShowing = false;
-			StartCoroutine(_sceneController.LoadLevel(slider,text,loadBar));
+			StartCoroutine (_sceneController.LoadLevel (slider, text, loadBar));
 		}
 	}
 
-	IEnumerator ShowPressToStart()
+	IEnumerator ShowPressToStart ()
 	{
-		yield return StartCoroutine(_screenFader.FadeSceneIn());
+		yield return StartCoroutine (_screenFader.FadeSceneIn ());
 		isShowing = true;
 	}
 }

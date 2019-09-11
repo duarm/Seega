@@ -12,16 +12,16 @@ namespace Kurenaiz.Utilities.Interfaces
         private static Dictionary<Type, List<Type>> _interfaceToComponentMapping;
         private static Type[] _allTypes;
 
-        static InterfaceFinder()
+        static InterfaceFinder ()
         {
-            InitInterfaceToComponentMapping();
+            InitInterfaceToComponentMapping ();
         }
 
-        private static void InitInterfaceToComponentMapping()
+        private static void InitInterfaceToComponentMapping ()
         {
-            _interfaceToComponentMapping = new Dictionary<Type, List<Type>>();
+            _interfaceToComponentMapping = new Dictionary<Type, List<Type>> ();
 
-            _allTypes = GetAllTypes();
+            _allTypes = GetAllTypes ();
 
             foreach (var curInterface in _allTypes)
             {
@@ -29,23 +29,23 @@ namespace Kurenaiz.Utilities.Interfaces
                 if (!curInterface.IsInterface)
                     continue;
 
-                var typeName = curInterface.ToString().ToLower();
+                var typeName = curInterface.ToString ().ToLower ();
 
                 //Skip system interfaces
-                if ( typeName.Contains( "unity" ) || typeName.Contains( "system." )
-                        || typeName.Contains( "mono." ) || typeName.Contains( "mono." ) || typeName.Contains( "icsharpcode." )
-                        || typeName.Contains( "nsubstitute" ) || typeName.Contains( "nunit." ) || typeName.Contains( "microsoft." )
-                        || typeName.Contains( "boo." ) || typeName.Contains( "serializ" ) || typeName.Contains( "json" )
-                        || typeName.Contains( "log." ) || typeName.Contains( "logging" ) || typeName.Contains( "test" )
-                        || typeName.Contains( "editor" ) || typeName.Contains( "debug" ) )
+                if (typeName.Contains ("unity") || typeName.Contains ("system.") ||
+                    typeName.Contains ("mono.") || typeName.Contains ("mono.") || typeName.Contains ("icsharpcode.") ||
+                    typeName.Contains ("nsubstitute") || typeName.Contains ("nunit.") || typeName.Contains ("microsoft.") ||
+                    typeName.Contains ("boo.") || typeName.Contains ("serializ") || typeName.Contains ("json") ||
+                    typeName.Contains ("log.") || typeName.Contains ("logging") || typeName.Contains ("test") ||
+                    typeName.Contains ("editor") || typeName.Contains ("debug"))
                     continue;
 
-                var typesInherited = GetTypesInheritedFromInterface( curInterface );
+                var typesInherited = GetTypesInheritedFromInterface (curInterface);
 
-                if ( typesInherited.Count <= 0 )
+                if (typesInherited.Count <= 0)
                     continue;
 
-                var componentsList = new List<Type>();
+                var componentsList = new List<Type> ();
 
                 foreach (var curType in typesInherited)
                 {
@@ -54,150 +54,150 @@ namespace Kurenaiz.Utilities.Interfaces
                         continue;
 
                     //Ignore non-component classes
-                    if ( !( typeof(Component) == curType || curType.IsSubclassOf( typeof(Component) ) ) )
+                    if (!(typeof (Component) == curType || curType.IsSubclassOf (typeof (Component))))
                         continue;
 
-                    if ( !componentsList.Contains( curType ) )
-                        componentsList.Add( curType );
+                    if (!componentsList.Contains (curType))
+                        componentsList.Add (curType);
                 }
 
-                _interfaceToComponentMapping.Add( curInterface, componentsList );
+                _interfaceToComponentMapping.Add (curInterface, componentsList);
             }
         }
 
-        private static Type[] GetAllTypes()
+        private static Type[] GetAllTypes ()
         {
-            var res = new List<Type>();
-            foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
+            var res = new List<Type> ();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies ())
             {
-                res.AddRange( assembly.GetTypes() );
+                res.AddRange (assembly.GetTypes ());
             }
 
-            return res.ToArray();
+            return res.ToArray ();
         }
 
-        private static IEnumerable<Type> GetTypesInheritedFromInterface<T>() where T : class
+        private static IEnumerable<Type> GetTypesInheritedFromInterface<T> () where T : class
         {
-            return GetTypesInheritedFromInterface( typeof(T) );
+            return GetTypesInheritedFromInterface (typeof (T));
         }
 
-        private static IList<Type> GetTypesInheritedFromInterface( Type type )
+        private static IList<Type> GetTypesInheritedFromInterface (Type type)
         {
             //Caching
-            if ( null == _allTypes )
+            if (null == _allTypes)
             {
-                _allTypes = GetAllTypes();
+                _allTypes = GetAllTypes ();
             }
 
-            var res = new List<Type>();
+            var res = new List<Type> ();
 
             foreach (var curType in _allTypes)
             {
-                if ( !( type.IsAssignableFrom( curType ) && curType.IsSubclassOf( typeof( Component ) ) ) )
+                if (!(type.IsAssignableFrom (curType) && curType.IsSubclassOf (typeof (Component))))
                     continue;
 
-                res.Add( curType );
+                res.Add (curType);
 
             }
 
             return res;
         }
 
-        public static IList<T> FindObjects<T>(bool firstOnly = false) where T : class
+        public static IList<T> FindObjects<T> (bool firstOnly = false) where T : class
         {
-            var resList = new List<T>();
+            var resList = new List<T> ();
 
-            var types = _interfaceToComponentMapping[ typeof(T) ];
+            var types = _interfaceToComponentMapping[typeof (T)];
 
-            if ( null == types || types.Count <= 0 )
+            if (null == types || types.Count <= 0)
             {
-                Debug.LogError( "No descendants found for type " + typeof(T) );
+                Debug.LogError ("No descendants found for type " + typeof (T));
                 return null;
             }
 
             foreach (var curType in types)
             {
                 Object[] objects = firstOnly ?
-                    new[] { Object.FindObjectOfType( curType ) }
-                    : Object.FindObjectsOfType( curType );
+                    new [] { Object.FindObjectOfType (curType) } :
+                    Object.FindObjectsOfType (curType);
 
-                if ( null == objects || objects.Length <= 0 )
+                if (null == objects || objects.Length <= 0)
                     continue;
 
-                var tList = new List<T>();
+                var tList = new List<T> ();
 
-                foreach ( var curObj in objects )
+                foreach (var curObj in objects)
                 {
                     var curObjAsT = curObj as T;
 
-                    if ( null == curObjAsT )
+                    if (null == curObjAsT)
                     {
-                        Debug.LogError( "Unable to cast '" + curObj.GetType() + "' to '" + typeof( T ) + "'" );
+                        Debug.LogError ("Unable to cast '" + curObj.GetType () + "' to '" + typeof (T) + "'");
                         continue;
                     }
 
-                    tList.Add( curObjAsT );
+                    tList.Add (curObjAsT);
                 }
 
-                resList.AddRange( tList );
+                resList.AddRange (tList);
             }
 
             return resList;
         }
 
-        public static T FindObject<T>() where T : class
+        public static T FindObject<T> () where T : class
         {
-            var list = FindObjects<T>();
+            var list = FindObjects<T> ();
 
             return list[0];
         }
 
-        public static IList<T> GetInterfaceComponents<T>( this Component component, bool firstOnly = false ) where T : class
+        public static IList<T> GetInterfaceComponents<T> (this Component component, bool firstOnly = false) where T : class
         {
-            var types = _interfaceToComponentMapping[typeof( T )];
+            var types = _interfaceToComponentMapping[typeof (T)];
 
-            if ( null == types || types.Count <= 0 )
+            if (null == types || types.Count <= 0)
             {
-                Debug.LogError( "No descendants found for type " + typeof( T ) );
+                Debug.LogError ("No descendants found for type " + typeof (T));
                 return null;
             }
 
-            var resList = new List<T>();
+            var resList = new List<T> ();
 
-            foreach ( var curType in types )
+            foreach (var curType in types)
             {
                 //Optimization - don't get all objects if we need only one
                 Component[] components = firstOnly ?
-                    new []{ component.GetComponent( curType ) }
-                    : component.GetComponents( curType );
+                    new [] { component.GetComponent (curType) } :
+                    component.GetComponents (curType);
 
-                if (null == components || components.Length <=0)
+                if (null == components || components.Length <= 0)
                     continue;
 
-                var tList = new List<T>();
+                var tList = new List<T> ();
 
                 foreach (var curComp in components)
                 {
                     var curCompAsT = curComp as T;
 
-                    if ( null == curCompAsT )
+                    if (null == curCompAsT)
                     {
-                        Debug.LogError( "Unable to cast '" + curComp.GetType() + "' to '" + typeof (T) + "'" );
+                        Debug.LogError ("Unable to cast '" + curComp.GetType () + "' to '" + typeof (T) + "'");
                         continue;
                     }
 
-                    tList.Add( curCompAsT );
+                    tList.Add (curCompAsT);
                 }
 
-                resList.AddRange( tList );
+                resList.AddRange (tList);
             }
 
             return resList;
         }
 
-        public static T GetInterfaceComponent<T>( this Component component ) where T : class
+        public static T GetInterfaceComponent<T> (this Component component) where T : class
         {
-            var list = GetInterfaceComponents<T>( component, true );
+            var list = GetInterfaceComponents<T> (component, true);
 
             return list[0];
         }

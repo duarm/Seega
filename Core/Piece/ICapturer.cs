@@ -1,4 +1,4 @@
 public interface ICapturer
 {
-    void Capture();
+    void Capture ();
 }

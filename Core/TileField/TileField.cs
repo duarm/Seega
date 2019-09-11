@@ -9,10 +9,10 @@ public class TileField : MonoBehaviour
 
     ISelectable _selectable;
     Coordinates coordinates;
-    
-    private void Start()
+
+    private void Start ()
     {
-        _selectable = GetComponent<ISelectable>();
+        _selectable = GetComponent<ISelectable> ();
     }
 
     public TileField Initialize (int row, int column, bool isWhite)

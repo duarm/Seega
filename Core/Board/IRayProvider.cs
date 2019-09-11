@@ -1,7 +1,6 @@
 using UnityEngine;
 
-
 public interface IRayProvider
 {
-    Ray CreateRay();
+    Ray CreateRay ();
 }

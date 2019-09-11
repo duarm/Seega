@@ -11,25 +11,25 @@ public class PhaseManager : MonoBehaviour, IPhaseManager
     private ITurnManager _turnManager;
 
     [Inject]
-    private void Construct(ITurnManager turnManager, EventManager eventManager)
+    private void Construct (ITurnManager turnManager, EventManager eventManager)
     {
         _eventManager = eventManager;
         _turnManager = turnManager;
     }
 
     public void StartPositioningPhaseAsBlack ()
-    { 
+    {
         _currentPhase = Phase.POSITIONING;
-        _turnManager.Start(ColorType.BLACK);
+        _turnManager.Initialize (ColorType.BLACK);
 
         if (_eventManager.OnStateChange != null)
             _eventManager.OnStateChange (_currentPhase);
     }
 
     public void StartPositioningPhaseAsWhite ()
-    { 
+    {
         _currentPhase = Phase.POSITIONING;
-        _turnManager.Start(ColorType.WHITE);
+        _turnManager.Initialize (ColorType.WHITE);
 
         if (_eventManager.OnStateChange != null)
             _eventManager.OnStateChange (_currentPhase);
@@ -43,7 +43,7 @@ public class PhaseManager : MonoBehaviour, IPhaseManager
             _eventManager.OnStateChange (_currentPhase);
     }
 
-    public Phase GetCurrentPhase()
+    public Phase GetCurrentPhase ()
     {
         return _currentPhase;
     }
