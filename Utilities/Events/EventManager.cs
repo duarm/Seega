@@ -1,17 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Seega.GlobalEnums;
+using Seega.Enums;
 
 namespace Kurenaiz.Utilities.Events
 {
-    public class EventManager : MonoBehaviour {
+    public class EventManager : MonoBehaviour, IEventManager {
 
         private Dictionary <string, Action> eventDictionary;
 
-        public Action<GameState> OnStateChange;
+        public Action<Phase> OnStateChange;
         public Action<bool> OnTurnChange;
-        public Action<string, string> OnGameEnd;
+        public Action<ColorType, string> OnGameEnd;
 
         void Init ()
         {

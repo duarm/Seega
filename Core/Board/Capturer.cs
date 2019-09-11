@@ -1,20 +1,17 @@
 using UnityEngine;
 
-namespace Seega.Scripts.Core
+public class Capturer : MonoBehaviour, ICapturer
 {
-    public class Capturer : MonoBehaviour, ICapturer
+    ParticleSystem _deathParticle;
+
+    private void Start()
     {
-        ParticleSystem _deathParticle;
+        _deathParticle = GetComponentInChildren<ParticleSystem> ();
+    }
 
-        private void Start()
-        {
-            _deathParticle = GetComponentInChildren<ParticleSystem> ();
-        }
-
-        public void Capture()
-        {
-            _deathParticle.Play ();
-            Destroy (this.gameObject, .5f);
-        }
+    public void Capture()
+    {
+        _deathParticle.Play ();
+        Destroy (this.gameObject, .5f);
     }
 }

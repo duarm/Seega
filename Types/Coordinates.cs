@@ -1,6 +1,4 @@
-using Seega.Scripts.Core;
-
-namespace Seega.Scripts.Types 
+namespace Seega.Types 
 {
     public struct Coordinates
     {

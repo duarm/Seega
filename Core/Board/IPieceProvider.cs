@@ -1,7 +1,5 @@
-namespace Seega.Scripts.Core
+public interface IPieceProvider
 {
-    public interface IPieceProvider
-    {
-        Piece[] CreatePieces();
-    }
+    Piece GetNonPlacedBlackPiece ();
+    Piece GetNonPlacedWhitePiece ();
 }

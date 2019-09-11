@@ -1,6 +1,5 @@
 ﻿using System.Collections;
-using Seega.Scripts.Core;
-using Seega.Scripts.Types;
+using Seega.Types;
 
 namespace Kurenaiz.Utilities.Types
 {

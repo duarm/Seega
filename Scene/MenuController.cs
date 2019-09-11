@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using Zenject;
 
 public class MenuController : MonoBehaviour 

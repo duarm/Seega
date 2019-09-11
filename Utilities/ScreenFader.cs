@@ -1,14 +1,11 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 //Unity 2d game kit Screen Fader
 public class ScreenFader : MonoBehaviour
 {
     void Awake ()
     {
-
         DontDestroyOnLoad (gameObject);
     }
 

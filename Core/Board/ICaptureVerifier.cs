@@ -1,10 +1,7 @@
 using Kurenaiz.Utilities.Types;
-using Seega.GlobalEnums;
+using Seega.Enums;
 
-namespace Seega.Scripts.Core
+public interface ICaptureVerifier
 {
-    public interface ICaptureVerifier
-    {
-        void VerifyCapture(TileField currentField, PieceType allyColor, Safe2DArray fields);
-    }
+    bool VerifyCapture(Safe2DArray fields, TileField currentField, ColorType allyColor);
 }

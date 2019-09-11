@@ -1,12 +1,10 @@
-using System;
 using Kurenaiz.Utilities.Events;
-using Seega.GlobalEnums;
-using Seega.Scripts.Core;
+using Seega.Enums;
 using TMPro;
 using UnityEngine;
 using Zenject;
 
-namespace Seega.Scripts.UI
+namespace Seega.UI
 {
     public class UIManager : MonoBehaviour
     {
@@ -48,11 +46,11 @@ namespace Seega.Scripts.UI
             _sceneController.RestartScene ();
         }
 
-        public void ActivateEndWindow (string winner, string winType)
+        public void ActivateEndWindow (ColorType winner, string winType)
         {
             surrenderButton.SetActive (false);
             endGameWindow.SetActive (true);
-            winnerText.text = winner;
+            winnerText.text = winner == ColorType.BLACK ? "Pretas" : "Brancas";
             victoryTypeText.text = winType;
         }
 
@@ -64,14 +62,14 @@ namespace Seega.Scripts.UI
                 turnText.text = turns[1];
         }
 
-        public void UpdateStateUI (GameState state)
+        public void UpdateStateUI (Phase state)
         {
             if (!surrenderButton.activeInHierarchy)
                 surrenderButton.SetActive (true);
 
-            if (state == GameState.POSITIONING)
+            if (state == Phase.POSITIONING)
                 stateText.text = states[0];
-            else if (state == GameState.MOVEMENT)
+            else if (state == Phase.MOVEMENT)
                 stateText.text = states[1];
         }
 
