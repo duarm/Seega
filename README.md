@@ -10,16 +10,20 @@ AI [ ]
 
 Online/Local [ ]
 
-Other Game Modes [ ]
+More Game Modes [ ]
 
 ### Technical Features
 
 -Event Manager [X]
 
--Dependecy Injection (Zenject) [X]
+-Dependecy Injection [X]
 
 -Game Object Caching [X]
 
--Pooling [ ]
+-Pooling [X]
+
+### Dependencies
+
+Zenject (DI)
 
 ![Game Image](~Git/seega_display_image.PNG)
