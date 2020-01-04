@@ -8,19 +8,21 @@ namespace Seega.UI
 {
     public class UIManager : MonoBehaviour
     {
-        public TextMeshProUGUI turnText;
-        public TextMeshProUGUI stateText;
+        [SerializeField] TextMeshProUGUI turnText;
+        [SerializeField] TextMeshProUGUI stateText;
 
-        public TextMeshProUGUI winnerText;
-        public TextMeshProUGUI victoryTypeText;
+        [SerializeField] TextMeshProUGUI winnerText;
+        [SerializeField] TextMeshProUGUI victoryTypeText;
 
-        public GameObject endGameWindow;
-        public GameObject surrenderButton;
+        [SerializeField] GameObject endGameWindow;
+        [SerializeField] GameObject surrenderButton;
 
-        private string[] turns = new string[2] { "Branca", "Preta" };
-        private string[] states = new string[2] { "Posicionamento", "Movimento" };
+        [SerializeField]
 
-        Board _board;
+        readonly string[] turns = new string[2] { "Branca", "Preta" };
+        readonly string[] states = new string[2] { "Posicionamento", "Movimento" };
+
+        private Board _board;
         private SceneController _sceneController;
         private EventManager _eventManager;
 
@@ -39,6 +41,13 @@ namespace Seega.UI
             _eventManager.OnTurnChange += UpdateTurnUI;
             _eventManager.OnStateChange += UpdateStateUI;
             _eventManager.OnGameEnd += ActivateEndWindow;
+        }
+
+        private void OnDestroy()
+        {
+            _eventManager.OnTurnChange -= UpdateTurnUI;
+            _eventManager.OnStateChange -= UpdateStateUI;
+            _eventManager.OnGameEnd -= ActivateEndWindow;
         }
 
         public void RestartButton ()
@@ -64,13 +73,13 @@ namespace Seega.UI
 
         public void UpdateStateUI (Phase state)
         {
-            if (!surrenderButton.activeInHierarchy)
-                surrenderButton.SetActive (true);
-
             if (state == Phase.POSITIONING)
                 stateText.text = states[0];
             else if (state == Phase.MOVEMENT)
+            {
+                surrenderButton.SetActive (true);
                 stateText.text = states[1];
+            }
         }
 
         //Called by the Help Button

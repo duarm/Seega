@@ -1,3 +1,4 @@
+using Kurenaiz.Utilities.Events;
 using Kurenaiz.Utilities.Interfaces;
 using Kurenaiz.Utilities.Physics;
 using Seega.UI;
@@ -6,34 +7,43 @@ using Zenject;
 
 public class GameInstaller : MonoInstaller
 {
-    [SerializeField] Board _board;
-    [SerializeField] UIManager _uiManager;
-    [SerializeField] PhysicsCache _physicsCache;
+    [SerializeField] Board board;
+    [SerializeField] UIManager uiManager;
+    [SerializeField] PhysicsCache physicsCache;
+    [SerializeField] EventManager eventManager;
 
     private void OnValidate ()
     {
-        if (_board == null)
-            _board = FindObjectOfType<Board> ();
+        if (board == null)
+            board = FindObjectOfType<Board> ();
 
-        if (_uiManager == null)
-            _uiManager = FindObjectOfType<UIManager> ();
+        if (uiManager == null)
+            uiManager = FindObjectOfType<UIManager> ();
 
-        if (_physicsCache == null)
-            _physicsCache = FindObjectOfType<PhysicsCache> ();
+        if (physicsCache == null)
+            physicsCache = FindObjectOfType<PhysicsCache> ();
+
+        if (eventManager == null)
+            eventManager = FindObjectOfType<EventManager> ();
     }
 
     public override void InstallBindings ()
     {
         Container.Bind<PhysicsCache> ()
-            .FromInstance (_physicsCache)
+            .FromInstance (physicsCache)
             .AsSingle ();
 
         Container.Bind<Board> ()
-            .FromInstance (_board)
+            .FromInstance (board)
             .AsSingle ();
 
         Container.Bind<UIManager> ()
-            .FromInstance (_uiManager)
+            .FromInstance (uiManager)
+            .AsSingle ()
+            .NonLazy ();
+
+        Container.Bind<EventManager> ()
+            .FromInstance (eventManager)
             .AsSingle ();
 
         Container.Bind<ITurnManager> ()
@@ -44,8 +54,16 @@ public class GameInstaller : MonoInstaller
             .FromInstance (InterfaceFinder.FindObject<IRayProvider> ())
             .AsSingle ();
 
-        Container.Bind<ISelector> ()
-            .FromInstance (InterfaceFinder.FindObject<ISelector> ())
+        ISelector selector = null;
+        if (selector != null)
+            Container.Bind<ISelector> ()
+            .FromInstance (selector)
+            .AsSingle ();
+
+        var selector2d = InterfaceFinder.FindObject<ISelector2D> ();
+        if (selector2d != null)
+            Container.Bind<ISelector2D> ()
+            .FromInstance (selector2d)
             .AsSingle ();
 
         Container.Bind<IFieldProvider> ()
@@ -70,6 +88,10 @@ public class GameInstaller : MonoInstaller
 
         Container.Bind<IGameFinisher> ()
             .FromInstance (InterfaceFinder.FindObject<IGameFinisher> ())
+            .AsSingle ();
+
+        Container.Bind<IMovementValidator> ()
+            .FromInstance (InterfaceFinder.FindObject<IMovementValidator> ())
             .AsSingle ();
 
     }

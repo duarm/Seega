@@ -5,10 +5,11 @@ public class TileField : MonoBehaviour
 {
     public Coordinates Coordinates { get { return coordinates; } }
     public Piece Piece { get; private set; }
-    public bool IsHighlighting { get { return _selectable.IsSelected (); } }
+    public bool IsSelected { get { return selected; } }
 
-    ISelectable _selectable;
+    bool selected = false;
     Coordinates coordinates;
+    ISelectable _selectable;
 
     private void Start ()
     {
@@ -50,11 +51,13 @@ public class TileField : MonoBehaviour
 
     public void OnSelect ()
     {
-        _selectable.OnSelect ();
+        selected = true;
+        _selectable?.OnSelect ();
     }
 
     public void OnDeselect ()
     {
-        _selectable.OnDeselect ();
+        selected = false;
+        _selectable?.OnDeselect ();
     }
 }

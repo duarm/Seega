@@ -51,7 +51,5 @@ public class ProjectInstaller : MonoInstaller
         Container.Bind<BackgroundMusicPlayer> ()
             .FromInstance (_backgroundMusicPlayer)
             .AsSingle ();
-
-        Debug.Log("Binded");
     }
 }

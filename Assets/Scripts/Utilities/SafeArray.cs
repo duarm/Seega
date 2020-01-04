@@ -50,6 +50,9 @@ namespace Kurenaiz.Utilities.Types
 	//The safe array returns null instead of OutOfBoundsException
 	public class Safe2DArray : IEnumerable
 	{
+		public int XLength { get { return items.GetLength(0); } }
+		public int YLength { get { return items.GetLength(1); } }
+
 		private TileField[, ] items;
 
 		public Safe2DArray (int rows, int columns)

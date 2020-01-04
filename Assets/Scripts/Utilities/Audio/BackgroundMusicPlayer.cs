@@ -33,8 +33,6 @@ namespace Kurenaiz.Utilities.Audio
 
 		void Awake ()
 		{
-			DontDestroyOnLoad (gameObject);
-
 			m_MusicAudioSource = gameObject.AddComponent<AudioSource> ();
 			m_MusicAudioSource.clip = musicAudioClip;
 			m_MusicAudioSource.outputAudioMixerGroup = musicOutput;

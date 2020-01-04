@@ -1,49 +1,17 @@
-namespace Seega.Types 
+namespace Seega.Types
 {
     public struct Coordinates
     {
         public int x;
         public int y;
 
-        public Coordinates up
-        {
-            get
-            {
-                return new Coordinates (x + 1, y);
-            }
-        }
+        public Coordinates up => new Coordinates (x + 1, y);
+        public Coordinates right => new Coordinates (x, y + 1);
+        public Coordinates down => new Coordinates (x - 1, y);
+        public Coordinates left => new Coordinates (x, y - 1);
 
-        public Coordinates right
-        {
-            get
-            {
-                return new Coordinates (x, y + 1);
-            }
-        }
-
-        public Coordinates down
-        {
-            get
-            {
-                return new Coordinates (x - 1, y);
-            }
-        }
-
-        public Coordinates left
-        {
-            get
-            {
-                return new Coordinates (x, y - 1);
-            }
-        }
-
-        public static Coordinates zero
-        {
-            get
-            {
-                return new Coordinates (0, 0);
-            }
-        }
+        public Coordinates[] cardinal4 => new Coordinates[4] { up, right, down, left };
+        public static Coordinates zero => new Coordinates (0, 0);
 
         public Coordinates (int x, int y)
         {
@@ -57,7 +25,7 @@ namespace Seega.Types
             this.y = tile.Coordinates.y;
         }
 
-        public override string ToString()
+        public override string ToString ()
         {
             return $"({x}, {y})";
         }
