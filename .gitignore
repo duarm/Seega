@@ -7,6 +7,7 @@ GraphViz/
 [Oo]bj/
 [Tt]emp/
 [Uu]nity/
+[Pp]lugins/
 
 # Visual Studio cache directory
 .vs/
@@ -28,11 +29,6 @@ ExportedObj/
 *.svd
 *.pdb
 *.opendb
-
-# Unity3D generated meta files
-*.pidb.meta
-*.pdb.meta
-*.meta
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
